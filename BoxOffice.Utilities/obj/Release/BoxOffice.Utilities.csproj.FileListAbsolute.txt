@@ -1,0 +1,4 @@
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Utilities\bin\Release\BoxOffice.Utilities.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Utilities\bin\Release\BoxOffice.Utilities.pdb
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Utilities\obj\Release\BoxOffice.Utilities.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Utilities\obj\Release\BoxOffice.Utilities.pdb

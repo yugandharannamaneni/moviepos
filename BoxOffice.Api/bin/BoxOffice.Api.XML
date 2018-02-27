@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BoxOffice.Api</name>
+    </assembly>
+    <members>
+        <member name="T:BoxOffice.Api.Controllers.LoginController">
+            <summary>
+            Master Data API: Provides api for theatre master data.
+            </summary>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.LoginController.#ctor(BoxOffice.DAL.Interfaces.ISeatTemplateRepository,BoxOffice.DAL.Interfaces.ISeatLayoutConfig,BoxOffice.DAL.Interfaces.IMovieTimingsRepository)">
+            <summary>
+            Default constructor
+            </summary>
+            <param name="seatTemplateRepository">ISeatTemplateRepository</param>
+            <param name="seatLayoutConfig">ISeatLayoutConfig</param>
+            <param name="movieTimingsRepository">IMovieTimingsRepository</param>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.LoginController.Login(System.String,System.String,System.String)">
+            <summary>
+            Returns list of theatres available.
+            </summary>
+            <returns>List of Theatre</returns>
+        </member>
+        <member name="T:BoxOffice.Api.Controllers.SeatBookingController">
+            <summary>
+            Master Data API: Provides api for theatre master data.
+            </summary>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.SeatBookingController.#ctor(BoxOffice.DAL.Interfaces.ISeatBookingRepository)">
+            <summary>
+            Default constructor
+            </summary>
+            <param name="seatBookingRepository">ISeatBookingRepository</param>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.SeatBookingController.CreateTempOrder(BoxOffice.Api.DataContracts.TempOrderViewModel)">
+            <summary>
+            Returns list of theatres available.
+            </summary>
+            <returns>List of Theatre</returns>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.SeatBookingController.CancelTempOrder(System.Int32)">
+            <summary>
+            Cancel Temp Order Id based on temp Order Id passed.
+            </summary>
+            <param name="tempOrderId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.SeatBookingController.CancelOrder(System.Int32)">
+            <summary>
+            Cancel Order Id based on Order Id passed.
+            </summary>
+            <param name="orderId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:BoxOffice.Api.Controllers.MasterDataController">
+            <summary>
+            Master Data API: Provides api for theatre master data.
+            </summary>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.MasterDataController.#ctor(BoxOffice.DAL.Interfaces.ISeatTemplateRepository,BoxOffice.DAL.Interfaces.ISeatLayoutConfig,BoxOffice.DAL.Interfaces.IMovieTimingsRepository)">
+            <summary>
+            Default constructor
+            </summary>
+            <param name="seatTemplateRepository">ISeatTemplateRepository</param>
+            <param name="seatLayoutConfig">ISeatLayoutConfig</param>
+            <param name="movieTimingsRepository">IMovieTimingsRepository</param>
+        </member>
+        <member name="M:BoxOffice.Api.Controllers.MasterDataController.GetTheatre">
+            <summary>
+            Returns list of theatres available.
+            </summary>
+            <returns>List of Theatre</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:BoxOffice.Api.Controllers.MasterDataController.GetScreens" -->
+        <!-- Badly formed XML comment ignored for member "M:BoxOffice.Api.Controllers.MasterDataController.GetScreenClasses(System.Int32)" -->
+        <!-- Badly formed XML comment ignored for member "M:BoxOffice.Api.Controllers.MasterDataController.GetMovies(System.DateTime)" -->
+        <!-- Badly formed XML comment ignored for member "M:BoxOffice.Api.Controllers.MasterDataController.GetMovieTimings(System.Int32,System.Int32,System.Int32)" -->
+        <!-- Badly formed XML comment ignored for member "M:BoxOffice.Api.Controllers.MasterDataController.GetSeatLayout(System.Int32,System.Int32,System.Int32)" -->
+    </members>
+</doc>

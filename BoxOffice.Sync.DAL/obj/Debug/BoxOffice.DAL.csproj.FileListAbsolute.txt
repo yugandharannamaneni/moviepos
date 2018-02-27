@@ -1,0 +1,11 @@
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\BoxOffice.DAL.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\BoxOffice.DAL.pdb
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\BoxOffice.Model.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\Dapper.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\BoxOffice.Model.pdb
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\Dapper.xml
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\obj\Debug\BoxOffice.DAL.csprojResolveAssemblyReference.cache
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\obj\Debug\BoxOffice.DAL.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\obj\Debug\BoxOffice.DAL.pdb
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\Autofac.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.DAL\bin\Debug\Autofac.xml

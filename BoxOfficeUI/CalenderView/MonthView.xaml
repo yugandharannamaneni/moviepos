@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="BoxOfficeUI.CalenderView.MonthView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:BoxOfficeUI.CalenderView"
+             mc:Ignorable="d" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+
+    <Grid VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Margin="0,0,0,5" HorizontalAlignment="Stretch" Grid.Row="0">
+             
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                        <Setter Property="FontSize" Value="20" />
+                        <Setter Property="VerticalAlignment" Value="Top" />
+                        <Setter Property="Margin" Value="0,1,0,0" />
+                    </Style>
+                </StackPanel.Resources>
+
+                <Image x:Name="MonthGoPrev"  Height="24"  Margin="10,0" IsHitTestVisible="False" Opacity="0.5"
+                       MouseLeftButtonUp="MonthGoPrev_MouseLeftButtonUp" Source="pack://application:,,,/Images/Back.png" >
+                </Image>
+
+                <Label x:Name="MonthYearLabel" Content="November 2017" />
+
+                <Image Name="MonthGoNext" Height="24" Margin="10,0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False" Opacity="0.5"
+                   MouseLeftButtonUp="MonthGoNext_MouseLeftButtonUp" Source="pack://application:,,,/Images/Back.png">
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="180"/>
+                    </Image.RenderTransform>
+                </Image>
+
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid>
+                <Grid.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                        <Setter Property="FontSize" Value="20" />
+                        <Setter Property="Height" Value="40" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                    </Style>
+                </Grid.Resources>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="170"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="1" Content="Sunday" BorderThickness="0,0,1,0"/>
+                <Label Grid.Column="2" Content="Monday" BorderThickness="0,0,1,0"/>
+                <Label Grid.Column="3" Content="Tuesday" BorderThickness="0,0,1,0"/>
+                <Label Grid.Column="4" Content="Wednesday" BorderThickness="0,0,1,0"/>
+                <Label Grid.Column="5" Content="Thursday" BorderThickness="0,0,1,0"/>
+                <Label Grid.Column="6" Content="Friday" BorderThickness="0,0,1,0"/>
+                <Label Grid.Column="7" Content="Saturday" />
+            </Grid>
+        </Grid>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="2" >
+            <Grid x:Name="MonthViewGrid" >
+                <Grid.RowDefinitions>
+                </Grid.RowDefinitions>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

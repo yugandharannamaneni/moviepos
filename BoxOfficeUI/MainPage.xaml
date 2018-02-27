@@ -1,0 +1,125 @@
+﻿<Window x:Class="BoxOfficeUI.MainPage"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  WindowStartupLocation="CenterScreen" WindowState="Maximized"
+                  Title="Box Office" Loaded="MyWindow_Loaded">
+    <Grid VerticalAlignment="Stretch">
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
+                <GradientStop Color="#FF31708E" Offset="0"/>
+                <GradientStop Color="#FFB3D5E5" Offset="0.75"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Grid x:Name="UserGrid" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="42"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal"  Grid.Column="1" Grid.Row="0" VerticalAlignment="Center">
+                <Label  x:Name="lblUserDisplayName" Content="Admin"></Label>
+
+                <Button x:Name="btnLogOut" Margin="0,0,10,0" Content="Log Out" Click="btnLogOut_Click"></Button>
+            </StackPanel>
+            
+            <TabControl x:Name="TabMaster" Height="30" SelectionChanged="TabControl_SelectionChanged"  Margin="10" BorderThickness="0" Grid.ColumnSpan="2">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Cursor" Value="Hand"></Setter>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Grid Name="Panel">
+                                        <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="10,2"/>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Panel" Property="Background" Value="#FFFFFF" />
+                                            <Setter Property="Foreground" Value="#FF31708E" />
+                                        </Trigger> 
+                                        <Trigger Property="IsSelected" Value="False">
+                                            <Setter TargetName="Panel" Property="Background" Value="Transparent" />
+                                            <Setter Property="Foreground" Value="#FFFFFF" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+
+                <TabItem x:Name="LAYOUTDESIGN" Header="LAYOUT DESIGN" Visibility="Collapsed"></TabItem>
+                <TabItem x:Name="MANAGERBLOCKING" Header="MANAGER BLOCKING" Visibility="Collapsed"></TabItem>
+                <TabItem x:Name="SCHEDULING" Header="SCHEDULING" Visibility="Collapsed"></TabItem>
+                <TabItem x:Name="BOOKING" Header="BOOKING" Visibility="Collapsed"></TabItem>
+                <TabItem x:Name="REPORTS" Header="REPORTS" Visibility="Collapsed"></TabItem>
+                <TabItem x:Name="HOLDTRAY" Header="HOLD TRAY" Visibility="Collapsed"></TabItem>
+            </TabControl>
+
+            <Border Grid.Row="1" Margin="10,0,10,10" BorderThickness="1" BorderBrush="LightGray"  Grid.ColumnSpan="2">
+                <Grid x:Name="DisplayBodyGrid" >
+
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="LoginGrid" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.Resources>
+                <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                    <Setter Property="FontFamily" Value="Segoe UI" />
+                    <Setter Property="FontSize" Value="18" />
+                </Style>
+
+                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                    <Setter Property="FontFamily" Value="Segoe UI" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Width" Value="300" />
+                    <Setter Property="Height" Value="25" />
+                    <Setter Property="BorderThickness" Value="0,0,0,2" />
+                </Style>
+
+                <Style TargetType="PasswordBox" BasedOn="{StaticResource {x:Type PasswordBox}}">
+                    <Setter Property="FontFamily" Value="Segoe UI" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Width" Value="300" />
+                    <Setter Property="Height" Value="25" />
+                    <Setter Property="BorderThickness" Value="0,0,0,2" />
+                </Style>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="30"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"></ColumnDefinition>
+                <ColumnDefinition Width="400"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Label  x:Name="lblTheatreName" Grid.Column="0" Grid.Row="0" Content="Theatre" HorizontalAlignment="Right"></Label>
+            <ComboBox x:Name="cmbTheatres" Grid.Column="1" Grid.Row="0" Width="300" Background="Transparent" BorderThickness="0,0,0,1.5" SelectedIndex="0" Foreground="White" FontSize="14" IsEnabled="False"/>
+            
+            <Label  x:Name="lblUserName" Grid.Column="0" Grid.Row="1" Content="User Name" HorizontalAlignment="Right"></Label>
+            <TextBox x:Name="txtUserName" Grid.Column="1" Grid.Row="1" MaxLength="50" Focusable="True" Background="Transparent" Foreground="White" KeyDown="txtUserName_KeyDown"></TextBox>
+
+            <Label  x:Name="lblPassword" Grid.Column="0" Grid.Row="2" Content="Password" HorizontalAlignment="Right"></Label>
+            <PasswordBox x:Name="txtPassword" Grid.Column="1" Grid.Row="2" MaxLength="50" Background="Transparent" Foreground="White" HorizontalAlignment="Left" KeyDown="txtUserName_KeyDown"></PasswordBox>
+
+            <Button x:Name="btnLogin" Grid.Column="1" Grid.Row="3" Content="Log In" Click="btnLogin_Click" Height="30"></Button>
+
+            <Label  x:Name="lblMessage" Grid.Column="1" Grid.Row="4" Foreground="Red"></Label>
+        </Grid>
+    </Grid>
+</Window>

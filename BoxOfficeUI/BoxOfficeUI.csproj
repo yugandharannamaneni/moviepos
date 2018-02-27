@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{27A92C26-F0D5-432A-9EAF-C21CDAC8489E}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BoxOfficeUI</RootNamespace>
+    <AssemblyName>BoxOfficeUI</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>B.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FirstFloor.ModernUI, Version=1.0.9.0, Culture=neutral, PublicKeyToken=bc9b0c37bf06c6a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\ModernUI.WPF.1.0.9\lib\net45\FirstFloor.ModernUI.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CalenderView\ModernDialogMessage.xaml.cs">
+      <DependentUpon>ModernDialogMessage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Seats\HoldTray.xaml.cs">
+      <DependentUpon>HoldTray.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Seats\Reports.xaml.cs">
+      <DependentUpon>Reports.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Util\Converters.cs" />
+    <Compile Include="Util\LogExceptions.cs" />
+    <Compile Include="Util\SeatProperties.cs" />
+    <Page Include="CalenderView\DayBoxAppointmentControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CalenderView\DayBoxControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CalenderView\ModernDialogMessage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CalenderView\MonthView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CalenderView\TimePicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CalenderView\WeekOfDaysControls.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Seats\Booking.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Seats\Reports.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Seats\LayoutDesign.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Seats\HoldTray.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Seats\ManagerBlocking.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="CalenderView\Scheduling.cs" />
+    <Compile Include="CalenderView\DayBoxAppointmentControl.xaml.cs">
+      <DependentUpon>DayBoxAppointmentControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CalenderView\DayBoxControl.xaml.cs">
+      <DependentUpon>DayBoxControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CalenderView\MonthView.xaml.cs">
+      <DependentUpon>MonthView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CalenderView\TimePicker.xaml.cs">
+      <DependentUpon>TimePicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CalenderView\WeekOfDaysControls.xaml.cs">
+      <DependentUpon>WeekOfDaysControls.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Seats\Booking.xaml.cs">
+      <DependentUpon>Booking.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Seats\LayoutDesign.xaml.cs">
+      <DependentUpon>LayoutDesign.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Seats\ManagerBlocking.xaml.cs">
+      <DependentUpon>ManagerBlocking.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Seats\Scheduling.xaml.cs">
+      <DependentUpon>Scheduling.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Util\Helper.cs" />
+    <Compile Include="MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Page Include="Seats\Scheduling.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Styles\Styles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="bin\Debug\BoxOfficeUI.exe.config" />
+    <None Include="bin\Debug\BoxOfficeUI.vshost.exe.config" />
+    <None Include="bin\Debug\BoxOfficeUI.vshost.exe.manifest" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BoxOffice.DAL\BoxOffice.DAL.csproj">
+      <Project>{ae1128c1-be8f-4f64-9b2d-eb8a5ef3ca67}</Project>
+      <Name>BoxOffice.DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BoxOffice.Model\BoxOffice.Model.csproj">
+      <Project>{ce34737b-2ec2-480f-9bbb-d6a1aea259e4}</Project>
+      <Name>BoxOffice.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="B.ico" />
+    <Content Include="bin\Debug\BoxOffice.DAL.dll" />
+    <Content Include="bin\Debug\BoxOffice.DAL.pdb" />
+    <Content Include="bin\Debug\BoxOffice.Model.dll" />
+    <Content Include="bin\Debug\BoxOffice.Model.pdb" />
+    <Content Include="bin\Debug\BoxOfficeUI.exe" />
+    <Content Include="bin\Debug\BoxOfficeUI.pdb" />
+    <Content Include="bin\Debug\BoxOfficeUI.vshost.exe" />
+    <Content Include="bin\Debug\Dapper.dll" />
+    <Content Include="bin\Debug\Dapper.xml" />
+    <Content Include="bin\Debug\FirstFloor.ModernUI.dll" />
+    <Content Include="bin\Debug\FirstFloor.ModernUI.xml" />
+    <Content Include="bin\Debug\Images\Back.png" />
+    <Content Include="bin\Debug\Images\BVR.ico" />
+    <Content Include="Images\Back.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Release\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

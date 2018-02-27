@@ -1,0 +1,5 @@
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\bin\Debug\BoxOffice.Model.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\bin\Debug\BoxOffice.Model.pdb
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\obj\Debug\BoxOffice.Model.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\obj\Debug\BoxOffice.Model.pdb
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\obj\Debug\BoxOffice.Model.csprojResolveAssemblyReference.cache

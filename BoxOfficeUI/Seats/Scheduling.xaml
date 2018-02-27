@@ -1,0 +1,170 @@
+﻿<UserControl x:Class="BoxOfficeUI.SeatLayout.Scheduling"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cal ="clr-namespace:BoxOfficeUI.CalenderView"
+             xmlns:mui="http://firstfloorsoftware.com/ModernUI"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="ListBox">
+            <Setter Property="KeyboardNavigation.TabNavigation" Value="Continue" />
+        </Style>
+
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Cursor" Value="Hand"></Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="#31708E"></Setter>
+                </Trigger>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="Foreground" Value="White"></Setter>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Margin="0,0,5,0">
+            <ListBox  x:Name="lstScreens" Background="Transparent" SelectedIndex="0" SelectedValuePath="Id" TabIndex="0" SelectionChanged="lstScreens_SelectionChanged">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding ScreenName}" TextWrapping="Wrap" FontSize="14" FontWeight="Bold"></TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="5"/>
+                        <Setter Property="Margin" Value="5,5,0,0"/>
+                        <Setter Property="Width" Value="130"/>
+                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                        <Setter Property="Foreground" Value="White"></Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+        </Grid>
+
+        <Grid Grid.Column="1" x:Name="calanderGrid" Visibility="Collapsed">
+            <cal:MonthView x:Name="SchedulCalendar"  VerticalAlignment="Stretch" VerticalContentAlignment="Stretch" Visibility="Visible" DisplayMonthChanged="SchedulCalendar_DisplayMonthChanged"
+                       SchedulingDblClicked="SchedulCalendar_SchedulingDblClicked" DayBoxDoubleClicked="SchedulCalendar_DayBoxDoubleClicked"  />
+        </Grid>
+
+        <Grid x:Name="ctrlsGrid" Grid.Column="1" MinWidth="500"  Visibility="Collapsed">
+            <Grid Margin="20,50">
+                <Grid.Resources>
+                    <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                        <Setter Property="Width" Value="42" />
+                    </Style>
+
+                    <Style TargetType="DatePicker" BasedOn="{StaticResource {x:Type DatePicker}}">
+                        <Setter Property="Width" Value="180" />
+                        <Setter Property="Height" Value="25" />
+                        <Setter Property="HorizontalAlignment" Value="Left" />
+                    </Style>
+
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Setter Property="Width" Value="80" />
+                    </Style>
+                </Grid.Resources>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0"></RowDefinition>
+                    <RowDefinition Height="0"></RowDefinition>
+                    <RowDefinition Height="40"></RowDefinition>
+                    <RowDefinition Height="40"></RowDefinition>
+                    <RowDefinition Height="120"></RowDefinition>
+                    <RowDefinition Height="40"></RowDefinition>
+                    <RowDefinition Height="0"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="40"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Content="Movie" Target="{Binding ElementName=cmbMovie}" Grid.Column="0" Grid.Row="2"></Label>
+                <ComboBox x:Name="cmbMovie" Grid.Column="1" Grid.Row="2" Width="180" TabIndex="10"/>
+
+                <Label Content="Starting Date" Target="{Binding ElementName=dprStartingDate}" Grid.Column="0" Grid.Row="3"></Label>
+                <DatePicker x:Name="dprStartingDate" Grid.Column="1" Grid.Row="3" TabIndex="11"/>
+
+                <Label Content="Time" Target="{Binding ElementName=cmbScreen}" Grid.Column="0" Grid.Row="4"></Label>
+
+                <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Vertical" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Hrs" Target="{Binding ElementName=cmbHours}"></Label>
+                        <ComboBox x:Name="cmbHours" Grid.Column="1" Grid.Row="2" IsEditable="True" TextSearch.TextPath="Content" KeyUp="cmbAutoSelection_KeyUp" TabIndex="12" />
+                        <Label Content="Mns" Target="{Binding ElementName=cmbMinuts}"></Label>
+                        <ComboBox x:Name="cmbMinuts" Grid.Column="1" Grid.Row="2" IsEditable="True" TextSearch.TextPath="Content" KeyUp="cmbAutoSelection_KeyUp" TabIndex="13"/>
+
+                        <Button Content="Add Time" x:Name="btnAddTime" Click="btnAddTime_Click" TabIndex="14" BorderThickness="0" Margin="0,0,10,0"/>
+                        <Button Content="Clear" x:Name="btnTimeClear" Click="btnTimeClear_Click" BorderThickness="0" Margin="0,0,10,0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        
+                    </StackPanel>
+                    <TextBox x:Name="txtShowTimes" IsTabStop="True" MaxLength="50" Margin="0,10,0,0" Width="300" Height="50" IsEnabled="False" PreviewTextInput="TimeTextBox_PreviewTextInput"></TextBox>
+                </StackPanel>
+
+                <Label Content="Days" Target="{Binding ElementName=txtDaysCount}" Grid.Column="0" Grid.Row="5"></Label>
+                <StackPanel Grid.Column="1" Grid.Row="5" Orientation="Horizontal">
+                    <Button Content=" - " x:Name="btnminus" Click="btnminus_Click" BorderThickness="0" IsHitTestVisible="False" Margin="0,0,10,0" TabIndex="15"/>
+                    <TextBox x:Name="txtDaysCount" Grid.Column="1" Grid.Row="5" Text="1" TabIndex="14" IsTabStop="False" IsEnabled="False" MaxLength="2" Margin="0" HorizontalContentAlignment="Center" PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
+                    <Button Content=" + " x:Name="btnplus" Click="btnplus_Click" BorderThickness="0" Margin="10,0,0,0" TabIndex="16"/>
+                </StackPanel>
+
+                <Label Content="Internet Sales" Target="{Binding ElementName=chkInternetSales}" Grid.Column="0" Grid.Row="6"></Label>
+                <CheckBox x:Name="chkInternetSales" Grid.Column="1" Grid.Row="6" TabIndex="17"></CheckBox>
+
+                <Label x:Name="lblTemplate" Content="Template" Target="{Binding ElementName=listSeatTemplates}" Grid.Column="0" Grid.Row="7"></Label>
+                <ListBox Name="listSeatTemplates" Grid.Column="1" Grid.Row="7" TabIndex="18" Background="Transparent" Foreground="White" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox  IsChecked="{Binding IsSelected, Mode=TwoWay}" Padding="2" />
+                                <Label Content="{Binding TEMPLATENAME}"></Label>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Margin" Value="5,5,0,0"/>
+                            <Setter Property="Width" Value="130"/>
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                            <Setter Property="Foreground" Value="White"></Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+
+                <DataGrid AutoGenerateColumns="False" Name="dgrdCosts" Foreground="White" CanUserAddRows="False" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="2" HorizontalAlignment="Left" GridLinesVisibility="Horizontal">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Class" Binding="{Binding ClassName}" IsReadOnly="True" Foreground="White"/>
+                        <DataGridTextColumn Header="TicketPrice" Binding="{Binding TicketPrice}" Foreground="White"/>
+                        <DataGridTextColumn Header="CGST" Binding="{Binding CGST}" Foreground="White" />
+                        <DataGridTextColumn Header="SGST" Binding="{Binding SGST}" Foreground="White" />
+                        <DataGridTextColumn Header="MC" Binding="{Binding MC}" Foreground="White" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel Grid.Column="1" Grid.Row="9" Orientation="Horizontal">
+                    <Button Content="Save" x:Name="btnSave" Click="btnSave_Click" TabIndex="19"/>
+                    <Button Content="Cancel" x:Name="btnCancel" Click="btnCancel_Click" TabIndex="20"  />
+                </StackPanel>
+
+            </Grid>
+        </Grid>
+
+        <mui:ModernProgressRing x:Name="pgrProgress"  IsActive="True" Grid.Row="0" Foreground="Yellow" Grid.ColumnSpan="3" Width="80" Height="80" Style="{StaticResource CircleProgressRingStyle}" />
+    </Grid>
+</UserControl>

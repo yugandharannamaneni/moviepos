@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="BoxOfficeUI.CalenderView.DayBoxAppointmentControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:BoxOfficeUI.CalenderView"
+             mc:Ignorable="d" >
+    <UserControl.Resources>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Padding" Value="2" />
+        </Style>
+    </UserControl.Resources>
+    <Border x:Name="BorderElement" CornerRadius="5" Background="LightGray" Width="145" Margin="2.5" >
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="DisplayHeader" Foreground="Black" Width="133" />
+                <Button x:Name="btnDelete" Background="Transparent" Margin="0" Padding="0,-6,0,0" Height="20" VerticalAlignment="Top" Foreground="Red" HorizontalAlignment="Right" Content="x">
+                </Button>
+            </StackPanel>
+            <TextBlock x:Name="DisplayContent" />
+        </StackPanel>
+    </Border>
+</UserControl>

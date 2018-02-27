@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="BoxOfficeUI.SeatLayout.Reports"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mui="http://firstfloorsoftware.com/ModernUI"
+             xmlns:Converter="clr-namespace:BoxOfficeUI.Util"
+            mc:Ignorable="d" >
+    <UserControl.Resources>
+        <Converter:StringToVisibilityConverter x:Key="StringToVisibilityConverter"></Converter:StringToVisibilityConverter>
+    </UserControl.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0"></RowDefinition>
+            <RowDefinition Height="65"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <TextBlock HorizontalAlignment="Center" Text="LAYOUT" FontSize="24" Margin="0,0"/>
+        </StackPanel>
+
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="2">
+            <TextBlock x:Name="txbLayoutMessage" FontSize="24" Foreground="White">This is under development</TextBlock>
+        </StackPanel>
+
+
+        <mui:ModernProgressRing x:Name="pgrProgress" IsActive="True" Visibility="Collapsed" Grid.Row="0" Foreground="Yellow" Grid.RowSpan="3" Width="80" Height="80" Style="{StaticResource CircleProgressRingStyle}" />
+    </Grid>
+</UserControl>

@@ -1,0 +1,4 @@
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\bin\Release\BoxOffice.Model.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\bin\Release\BoxOffice.Model.pdb
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\obj\Release\BoxOffice.Model.dll
+D:\ProjectsV3\HRAdmin\BoxOffice\BoxOffice.Model\obj\Release\BoxOffice.Model.pdb

@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>D:\ProjectsV3\HRAdmin\Publish</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="bin/Autofac.dll">
+      <publishTime>01/01/2018 16:49:50</publishTime>
+    </File>
+    <File Include="bin/Autofac.Integration.Mvc.dll">
+      <publishTime>01/02/2018 22:40:16</publishTime>
+    </File>
+    <File Include="bin/Autofac.Integration.WebApi.dll">
+      <publishTime>01/03/2018 09:05:09</publishTime>
+    </File>
+    <File Include="bin/AutoMapper.dll">
+      <publishTime>01/01/2018 17:03:02</publishTime>
+    </File>
+    <File Include="bin/BoxOffice.Api.dll">
+      <publishTime>02/02/2018 20:47:51</publishTime>
+    </File>
+    <File Include="bin/BoxOffice.DAL.dll">
+      <publishTime>02/02/2018 20:47:48</publishTime>
+    </File>
+    <File Include="bin/BoxOffice.Model.dll">
+      <publishTime>02/02/2018 20:47:48</publishTime>
+    </File>
+    <File Include="bin/BoxOffice.Utilities.dll">
+      <publishTime>01/06/2018 14:59:09</publishTime>
+    </File>
+    <File Include="bin/Dapper.dll">
+      <publishTime>12/31/2017 18:20:06</publishTime>
+    </File>
+    <File Include="bin/log4net.dll">
+      <publishTime>01/02/2018 21:46:35</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.dll">
+      <publishTime>08/19/2014 14:42:24</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.dll">
+      <publishTime>08/19/2014 14:42:32</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.OAuth.dll">
+      <publishTime>08/19/2014 14:42:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Web.Infrastructure.dll">
+      <publishTime>01/01/2018 11:31:52</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>01/02/2018 22:27:38</publishTime>
+    </File>
+    <File Include="bin/Owin.dll">
+      <publishTime>01/01/2018 11:32:32</publishTime>
+    </File>
+    <File Include="bin/Swashbuckle.Core.dll">
+      <publishTime>01/02/2018 22:27:39</publishTime>
+    </File>
+    <File Include="bin/System.IdentityModel.Tokens.Jwt.dll">
+      <publishTime>11/02/2014 16:40:08</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.Formatting.dll">
+      <publishTime>01/01/2018 11:31:55</publishTime>
+    </File>
+    <File Include="bin/System.Web.Helpers.dll">
+      <publishTime>01/02/2018 22:40:26</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.dll">
+      <publishTime>01/01/2018 11:31:59</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.WebHost.dll">
+      <publishTime>01/01/2018 11:32:01</publishTime>
+    </File>
+    <File Include="bin/System.Web.Mvc.dll">
+      <publishTime>01/02/2018 22:40:30</publishTime>
+    </File>
+    <File Include="bin/System.Web.Razor.dll">
+      <publishTime>01/02/2018 22:40:24</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Deployment.dll">
+      <publishTime>01/02/2018 22:40:26</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.dll">
+      <publishTime>01/02/2018 22:40:26</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Razor.dll">
+      <publishTime>01/02/2018 22:40:26</publishTime>
+    </File>
+    <File Include="bin/Thinktecture.IdentityModel.Core.dll">
+      <publishTime>12/05/2014 14:58:06</publishTime>
+    </File>
+    <File Include="bin/WebActivatorEx.dll">
+      <publishTime>01/02/2018 22:27:35</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>01/01/2018 11:36:09</publishTime>
+    </File>
+    <File Include="packages.config">
+      <publishTime>02/02/2018 20:35:29</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>02/02/2018 20:47:51</publishTime>
+    </File>
+  </ItemGroup>
+</Project>
