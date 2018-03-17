@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http.Controllers;
 
+
 namespace BoxOffice.Api
 {
     public static class AuthHelper
