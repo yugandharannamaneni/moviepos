@@ -1,0 +1,2373 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>PosAPI Documentation V3</title><link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"><link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400,700|Inconsolata|Raleway:200|Source+Code+Pro"><link rel="stylesheet" href="highlight.css"><link rel="stylesheet" href="posapi_theme.css"></head><body data-spy="scroll" data-target="#nav-container"><a href="#top" class="text-muted back-to-top"><i class="fa fa-toggle-up"></i>&nbsp;Back to top</a><div class="container"><div class="row"><div id="documentation-content" class="col-md-9"><div><header><div class="page-header"><h1 id="top">PosAPI Documentation V3</h1></div></header><div class="description"><p>The <strong>bwin.party Point of Sale API (PosAPI)</strong> is a set of APIs that allow for the development of various clients
+while providing security and customizability for the clients’ needs and striving to offering sane interfaces for
+(nearly) all functionality necessary to implement such a client.</p>
+<p>This document deals with the common concepts of using these APIs and the specific functionalities of the
+so called <strong>Platform PosAPI</strong> (also known as <strong>PPos</strong>) which is used for authentication, access to user settings
+and common functionalities like retrieving lists of countries and currencies that are valid for a given client.</p>
+</div></div><div class="resourcePanel"><div class="panel panel-default"><div class="panel-heading"><h2 id="authentication">Authentication&nbsp;<a href="#authentication"><i class="fa fa-link"></i></a></h2></div><div class="panel-body"><p>The following section describes the basic concepts of <strong>Authentication</strong> and <strong>Authorization</strong> used by and required for communicating with the API.</p>
+<h3 id="authentication-usertoken-and-sessiontoken">UserToken and SessionToken&nbsp;<a href="#authentication-usertoken-and-sessiontoken"><i class="fa fa-link"></i></a></h3><p>A UserToken is used to identify a particular bwin.party customer. Depending on the called service it may be required or not. In general, all customer specific services like Account Data need valid tokens while static data services like the country list don’t.</p>
+<p>User- and SessionToken are obtained through a successful <a href="#authentication-login">Login</a>. The returned tokens should be stored by the client throughout the whole session and shall be sent with every PosAPI request that is related to this customer as HTTP headers or URI-parameters:</p>
+<pre><code class="language-http"><span class="hljs-attribute">x-bwin-session-token</span>: <span class="hljs-string">[SessionToken]</span>
+<span class="hljs-attribute">x-bwin-user-token</span>: <span class="hljs-string">[UserToken]</span></code></pre>
+<p>The UserToken is valid for 20 hours after session start. The SessionToken is valid for 20 minutes after the last request  (10 minutes for Italy). In case the token has to be renewed without triggering any other action on PosAPI side the Refresh method can be used.</p>
+<p>All passed Tokens are validated on each incoming requests, and in case of violation dedicated ErroCodes are returned.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>201</code></td>
+<td>Invalid security token (deprecated)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>204</code></td>
+<td>Missing access token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>205</code></td>
+<td>Missing session token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>206</code></td>
+<td>Missing user token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>207</code></td>
+<td>Session security token expired</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>208</code></td>
+<td>User security token expired</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>209</code></td>
+<td>Session token invalid</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>210</code></td>
+<td>User token invalid</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authentication-account-category-ids">Account Category Ids&nbsp;<a href="#authentication-account-category-ids"><i class="fa fa-link"></i></a></h3><table>
+<thead>
+<tr>
+<th style="text-align:center">ID</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>-1</code></td>
+<td>Unknown account category or category id not supported</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>0</code></td>
+<td>New user</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>1</code></td>
+<td>User is RGclosed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>2</code></td>
+<td>User is in a closed state with CoolOff</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>3</code></td>
+<td>User is suspended</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>4</code></td>
+<td>User is closed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authentication-player-category-ids">Player Category Ids&nbsp;<a href="#authentication-player-category-ids"><i class="fa fa-link"></i></a></h3><table>
+<thead>
+<tr>
+<th style="text-align:center">ID</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>0</code></td>
+<td>Play user</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>1</code></td>
+<td>Real user</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>2</code></td>
+<td>Pseudo user</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authentication-checkcountryblock">CheckCountryBlock&nbsp;<a href="#authentication-checkcountryblock"><i class="fa fa-link"></i></a></h3><p>PosAPI holds a simple rule-set to provide information about country-specific actions, e.g. redirection to a targetUrl, displaying content, and so on. The ruleset takes under consideration the used AccessId (frontendID, brandID, … parameters) and the twoletter countryCode. If no matching rule exists it will return with an HTTP 200, otherwise the response will be an HTTP 403 Forbidden, containing a keyValue-list of additional parameters.</p>
+<section id="authentication-checkcountryblock-get" class="panel panel-info"><div class="panel-heading"><button onclick="Invoker(&quot;authentication-checkcountryblock-get-invoker&quot;);" class="btn btn-xs btn-warning actionTryIt">INVOKE<span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></button><div class="actionMethod">                               <a href="#authentication-checkcountryblock-get" class="btn btn-xs btn-primary">GET</a></div><div style="overflow:hidden"><div class="action">/CheckCountryBlock</div></div><div class="actionDescription"><span style="text-transform: lowercase">Checks if the given country is blocked</span></div></div><ul style="display:none;" id="authentication-checkcountryblock-get-invoker" class="list-group invoker"><li class="list-group-item"><div class="invoker-title"><strong>Invoker</strong><span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></div><!-- get first request sample and check if json--><div role="alert" style="display:none;" class="tokenAlert alert alert-danger"><strong>Oh snap!   </strong>You are missing required tokens to perform this operation.<button data-toggle="modal" data-target="#TokenManagement" class="btn btn-s btn-danger">Token Management<span aria-hidden="true" class="glyphicon glyphicon-pencil withtext"></span></button></div><div role="alert" style="display:none;" class="alert alert-danger alert-dismissible parameterWarning"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><strong>Error!   </strong>It seems the parameter description does not fit the endpoint.<br>In order for the invoker to work, <strong>all </strong>parameters must be documented in the correct order.</div><ul class="list-group param-editor"><li class="list-group-item bg-default"><strong>Query Editor</strong></li><li class="list-group-item"><div class="row"><div class="col-xs-2 parameterName"><strong>id</strong></div><div class="col-xs-4 parameterInput"><input id="authentication-checkcountryblock-get-invoker_id" type="text" placeholder="Example: CH" onkeyup="ParameterInput('authentication-checkcountryblock-get-invoker','1','id');" class="form-control input-sm"></div><div class="col-xs-6 description"><code>string</code>&nbsp;<span class="required">(required)</span><div>The twoletter countrycode of the country. [ISO](http://en.wikipedia.org/wiki/ISO_3166-1)</div></div></div></li></ul><pre><div class="section unselectable">Request</div><code id="authentication-checkcountryblock-get-invoker-request" class="invokerRequestCode"><div style="display: none;" class="uriTemplate">/Authentication.svc/CheckCountryBlock?countryId={id}</div><span class="hljs-request">GET <span class="hljs-string">/Authentication.svc/CheckCountryBlock?countryId={id}</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">[Host]/V3</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br></code><button onclick="CallAPI(&quot;authentication-checkcountryblock-get-invoker&quot;,&quot;/V3&quot;,&quot;GET&quot;);" class="btn btn-l btn-primary pull-right">SEND<span aria-hidden="true" class="glyphicon glyphicon-send withtext"></span></button><button id="authentication-checkcountryblock-get-invoker-clear" style="display:none;" onclick="Clear(&quot;authentication-checkcountryblock-get-invoker&quot;);" class="btn btn-l btn-default pull-right invoker-clear"><span aria-hidden="true" class="glyphicon glyphicon-trash"></span></button></pre><div role="alert" style="display:none;" class="rememberTokens alert alert-success alert-dismissible"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><div><strong>New Tokens!   </strong><br>The response contains a <strong>SessionToken </strong>and <strong>UserToken</strong>.<br>Would you like to remember these for upcoming requests?<button class="btn btn-s btn-success pull-right remember">Remember<span aria-hidden="true" class="glyphicon glyphicon-floppy-save withtext"></span></button></div></div><pre id="authentication-checkcountryblock-get-invoker-response" style="display:none;"><div class="section unselectable">Response</div><code id="authentication-checkcountryblock-get-invoker-response-header"></code><hr><code id="authentication-checkcountryblock-get-invoker-response-body"></code></pre></li></ul><ul class="list-group"><li class="list-group-item bg-default"><strong>Query Parameters</strong></li><li class="list-group-item parameters"><dl class="dl-horizontal"><dt>id</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<span class="text-muted example"><strong>Example:&nbsp;</strong><span>CH</span></span><p>The twoletter countrycode of the country. <a href="http://en.wikipedia.org/wiki/ISO_3166-1">ISO</a></p>
+</dd></dl></li></ul><ul class="list-group"><li data-toggle="collapse" data-target="#df159da677ba7ad3f3ffc0efbf6d9b56" class="list-group-item pull-right collapsed"><strong>Request<span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span></strong></li><li id="df159da677ba7ad3f3ffc0efbf6d9b56" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-request">GET <span class="hljs-string">/Authentication.svc/CheckCountryBlock?countryId={id}</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">api.pos.com/V3</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><br></code></pre></li><li class="list-group-item"><strong>Response&nbsp;&nbsp;<code>200</code></strong></li><li data-toggle="collapse" data-target="#226b6ecf32cfc651c3c231a6d122b218" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>400</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span></strong></li><li id="226b6ecf32cfc651c3c231a6d122b218" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Body</div><code>{
+  "<span class="hljs-attribute">code</span>": <span class="hljs-value"><span class="hljs-number">102</span></span>,
+  "<span class="hljs-attribute">message</span>": <span class="hljs-value"><span class="hljs-string">"Invalid country"</span>
+</span>}</code></pre></li><li data-toggle="collapse" data-target="#a4c2900bfe10744885d3b10ecf3c6c41" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>403</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span></strong></li><li id="a4c2900bfe10744885d3b10ecf3c6c41" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Body</div><code>{
+  "<span class="hljs-attribute">code</span>": <span class="hljs-value"><span class="hljs-number">456</span></span>,
+  "<span class="hljs-attribute">message</span>": <span class="hljs-value"><span class="hljs-string">"Blocked by country rule"</span></span>,
+  "<span class="hljs-attribute">values</span>": <span class="hljs-value">[
+    {
+      "<span class="hljs-attribute">Key</span>": <span class="hljs-value"><span class="hljs-string">"TargetUrl"</span></span>,
+      "<span class="hljs-attribute">Value</span>": <span class="hljs-value"><span class="hljs-string">"https://www.bwin.fr"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">Key</span>": <span class="hljs-value"><span class="hljs-string">"SitecorePath"</span></span>,
+      "<span class="hljs-attribute">Value</span>": <span class="hljs-value"><span class="hljs-string">""</span>
+    </span>}
+  ]
+</span>}</code></pre></li></ul></section><h3 id="authentication-login">Login&nbsp;<a href="#authentication-login"><i class="fa fa-link"></i></a></h3><p>A customer login is performed by sending a <code>POST</code> request to the PosAPI authentication endpoint.
+The body is a simple “Login” element with username and password, as well as <code>language</code> and <code>deviceID</code> as optional attributes.
+In case the <code>language</code> parameter is missing, the default language will be used.</p>
+<p>The <code>deviceID</code> parameter is used to pass along the ID of mobile devices, and by doing so associating the created session with the device (used for DWH).</p>
+<p>The <code>dateOfBirth</code> parameter is only required for labels with that regulatory requirement (e.g. <a href="http://bwin.fr">bwin.fr</a>).</p>
+<p>By passing along a <code>handshakeSessionKey</code>, the authentication request gets associated with an already available session in the backend.
+If this parameter is part of the request sent to the backend, the interceptor-stack of the backend will not be executed, and the password-parameter can be empty.
+This is used for example for the 3rd-party integration with <em>DanskeSpil</em>.</p>
+<blockquote>
+<p><strong>Note:</strong> There are various so-called interceptors which may deny a successful authentication. Those are handled in a <a href="#authentication-workflow-ids">Workflow</a>, the user has to complete before being fully authenticated.
+The <code>workflowType</code> parameter of the response exposes which workflow the user is in (<code>0</code> if none).</p>
+</blockquote>
+<section id="authentication-login-post" class="panel panel-success"><div class="panel-heading"><button onclick="Invoker(&quot;authentication-login-post-invoker&quot;);" class="btn btn-xs btn-warning actionTryIt">INVOKE<span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></button><div class="actionMethod">                               <a href="#authentication-login-post" class="btn btn-xs btn-success">POST</a></div><div style="overflow:hidden"><div class="action">/Login</div></div><div class="actionDescription"><span style="text-transform: lowercase">Login a User</span></div></div><ul style="display:none;" id="authentication-login-post-invoker" class="list-group invoker"><li class="list-group-item"><div class="invoker-title"><strong>Invoker</strong><span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></div><!-- get first request sample and check if json--><div role="alert" style="display:none;" class="tokenAlert alert alert-danger"><strong>Oh snap!   </strong>You are missing required tokens to perform this operation.<button data-toggle="modal" data-target="#TokenManagement" class="btn btn-s btn-danger">Token Management<span aria-hidden="true" class="glyphicon glyphicon-pencil withtext"></span></button></div><div role="alert" style="display:none;" class="alert alert-danger alert-dismissible parameterWarning"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><strong>Error!   </strong>It seems the parameter description does not fit the endpoint.<br>In order for the invoker to work, <strong>all </strong>parameters must be documented in the correct order.</div><pre><div class="section unselectable">Request</div><code id="authentication-login-post-invoker-request" class="invokerRequestCode"><div style="display: none;" class="uriTemplate">/Authentication.svc/Login</div><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/Login</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">[Host]/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br></code><hr><div id="authentication-login-post-invoker_editor" class="requestBodyEditor">{
+  &quot;username&quot;: &quot;myUserName&quot;,
+  &quot;password&quot;: &quot;password&quot;,
+  &quot;language&quot;: &quot;EN&quot;,
+  &quot;deviceId&quot;: &quot;ABC123&quot;,
+  &quot;dateOfBirth&quot;: &quot;/Date(1315996382000)/&quot;,
+  &quot;handshakeSessionKey&quot;: &quot;7401fefbad9a4f87a40e5d54930c285d&quot;,
+  &quot;ucid&quot;: &quot;12345abcd&quot;,
+  &quot;fingerprint&quot;: {
+    &quot;superCookie&quot;: &quot;superSecretSuperCookie&quot;,
+    &quot;deviceDetails&quot;: [
+      {
+        &quot;Key&quot;: &quot;dt&quot;,
+        &quot;Value&quot;: &quot;website&quot;
+      },
+      {
+        &quot;Key&quot;: &quot;os&quot;,
+        &quot;Value&quot;: &quot;Windows&quot;
+      }
+    ]
+  }
+}</div><button onclick="CallAPI(&quot;authentication-login-post-invoker&quot;,&quot;/V3&quot;,&quot;POST&quot;);" class="btn btn-l btn-primary pull-right">SEND<span aria-hidden="true" class="glyphicon glyphicon-send withtext"></span></button><button id="authentication-login-post-invoker-clear" style="display:none;" onclick="Clear(&quot;authentication-login-post-invoker&quot;);" class="btn btn-l btn-default pull-right invoker-clear"><span aria-hidden="true" class="glyphicon glyphicon-trash"></span></button></pre><div role="alert" style="display:none;" class="rememberTokens alert alert-success alert-dismissible"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><div><strong>New Tokens!   </strong><br>The response contains a <strong>SessionToken </strong>and <strong>UserToken</strong>.<br>Would you like to remember these for upcoming requests?<button class="btn btn-s btn-success pull-right remember">Remember<span aria-hidden="true" class="glyphicon glyphicon-floppy-save withtext"></span></button></div></div><pre id="authentication-login-post-invoker-response" style="display:none;"><div class="section unselectable">Response</div><code id="authentication-login-post-invoker-response-header"></code><hr><code id="authentication-login-post-invoker-response-body"></code></pre></li></ul><div class="panel-body"><ul>
+<li>
+<p><code>username</code>: (string) - The username of the account.</p>
+</li>
+<li>
+<p><code>password</code>: (string) - The password associated with the account.</p>
+</li>
+<li>
+<p><code>language</code>: (optional, string) - The twoletter lanague code.</p>
+</li>
+<li>
+<p><code>deviceId</code>: (optional, string) - Can be used by mobile clients.</p>
+</li>
+<li>
+<p><code>dateOfBirth</code>: (optional, dateTime) - Mandatory for french labels.</p>
+</li>
+<li>
+<p><code>handshakeSessionkey</code>: (optional, string)</p>
+</li>
+<li>
+<p><code>ucid</code>: (optional, string)</p>
+</li>
+</ul>
+</div><ul class="list-group"><li data-toggle="collapse" data-target="#eace52063f57e59242e841de48ebee53" class="list-group-item pull-right collapsed"><strong>Request<span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="eace52063f57e59242e841de48ebee53" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/Login</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">api.pos.com/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><br></code><hr><div class="section unselectable">Body</div><code>{
+  "<span class="hljs-attribute">username</span>": <span class="hljs-value"><span class="hljs-string">"myUserName"</span></span>,
+  "<span class="hljs-attribute">password</span>": <span class="hljs-value"><span class="hljs-string">"password"</span></span>,
+  "<span class="hljs-attribute">language</span>": <span class="hljs-value"><span class="hljs-string">"EN"</span></span>,
+  "<span class="hljs-attribute">deviceId</span>": <span class="hljs-value"><span class="hljs-string">"ABC123"</span></span>,
+  "<span class="hljs-attribute">dateOfBirth</span>": <span class="hljs-value"><span class="hljs-string">"/Date(1315996382000)/"</span></span>,
+  "<span class="hljs-attribute">handshakeSessionKey</span>": <span class="hljs-value"><span class="hljs-string">"7401fefbad9a4f87a40e5d54930c285d"</span></span>,
+  "<span class="hljs-attribute">ucid</span>": <span class="hljs-value"><span class="hljs-string">"12345abcd"</span></span>,
+  "<span class="hljs-attribute">fingerprint</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">superCookie</span>": <span class="hljs-value"><span class="hljs-string">"superSecretSuperCookie"</span></span>,
+    "<span class="hljs-attribute">deviceDetails</span>": <span class="hljs-value">[
+      {
+        "<span class="hljs-attribute">Key</span>": <span class="hljs-value"><span class="hljs-string">"dt"</span></span>,
+        "<span class="hljs-attribute">Value</span>": <span class="hljs-value"><span class="hljs-string">"website"</span>
+      </span>},
+      {
+        "<span class="hljs-attribute">Key</span>": <span class="hljs-value"><span class="hljs-string">"os"</span></span>,
+        "<span class="hljs-attribute">Value</span>": <span class="hljs-value"><span class="hljs-string">"Windows"</span>
+      </span>}
+    ]
+  </span>}
+</span>}</code></pre></li><li data-toggle="collapse" data-target="#1665dc0f5e1db1e452bee74f5ed16010" class="list-group-item pull-right collapsed"><strong>Request<span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default xml">XML</span></strong></li><li id="1665dc0f5e1db1e452bee74f5ed16010" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/Login</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">api.pos.com/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/xml</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><br></code><hr><div class="section unselectable">Body</div><code><span class="hljs-tag">&lt;<span class="hljs-title">Login</span> 
+  <span class="hljs-attribute">username</span>=<span class="hljs-value">"username"</span> 
+  <span class="hljs-attribute">password</span>=<span class="hljs-value">"password"</span> 
+  <span class="hljs-attribute">language</span>=<span class="hljs-value">"EN"</span> 
+  <span class="hljs-attribute">deviceId</span>=<span class="hljs-value">"ABC123"</span> 
+  <span class="hljs-attribute">dateOfBirth</span>=<span class="hljs-value">"1997-06-13"</span> 
+  <span class="hljs-attribute">handshakeSessionKey</span>=<span class="hljs-value">"7401fefbad9a4f87a40e5d54930c285d"</span>
+  <span class="hljs-attribute">ucid</span>=<span class="hljs-value">"12345abcd"</span>
+/&gt;</span></code></pre></li><li data-toggle="collapse" data-target="#043e8d25c468c292dfcfc2b99179f348" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>200</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="043e8d25c468c292dfcfc2b99179f348" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-status">HTTP/1.1 <span class="hljs-number">200</span> OK</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br></code><hr><div class="section unselectable">Body</div><code>{  
+   "<span class="hljs-attribute">Balance</span>":<span class="hljs-value">{  
+      "<span class="hljs-attribute">accountBalance</span>":<span class="hljs-value"><span class="hljs-number">1250.01</span></span>,
+      "<span class="hljs-attribute">accountCurrency</span>":<span class="hljs-value"><span class="hljs-string">"EUR"</span></span>,
+      "<span class="hljs-attribute">balanceForGameType</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">bonusWinningsRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">cashoutRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">cashoutableBalance</span>":<span class="hljs-value"><span class="hljs-number">1250.01</span></span>,
+      "<span class="hljs-attribute">depositRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">inPlayAmount</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">owedAmount</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">playMoneyBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">playMoneyInPlayAmount</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">releaseRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span>
+   </span>}</span>,
+   "<span class="hljs-attribute">ClaimValues</span>":<span class="hljs-value">[  
+      {  
+         "<span class="hljs-attribute">Key</span>":<span class="hljs-value"><span class="hljs-string">"SampleClaimKey"</span></span>,
+         "<span class="hljs-attribute">Value</span>":<span class="hljs-value"><span class="hljs-string">"SampleClaimValue"</span>
+      </span>}
+   ]</span>,
+   "<span class="hljs-attribute">PendingActions</span>":<span class="hljs-value">{  
+      "<span class="hljs-attribute">Actions</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+      "<span class="hljs-attribute">ordered</span>":<span class="hljs-value"><span class="hljs-literal">false</span>
+   </span>}</span>,
+   "<span class="hljs-attribute">PostLoginValues</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">SogeiCustomerId</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">accountCategoryId</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+   "<span class="hljs-attribute">accountId</span>":<span class="hljs-value"><span class="hljs-number">110750845</span></span>,
+   "<span class="hljs-attribute">globalSessionId</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">language</span>":<span class="hljs-value"><span class="hljs-string">"EN"</span></span>,
+   "<span class="hljs-attribute">lastLoginUTC</span>":<span class="hljs-value"><span class="hljs-string">"/Date(0)/"</span></span>,
+   "<span class="hljs-attribute">lastLogoutUTC</span>":<span class="hljs-value"><span class="hljs-string">"/Date(0)/"</span></span>,
+   "<span class="hljs-attribute">playerCategory</span>":<span class="hljs-value"><span class="hljs-number">1</span></span>,
+   "<span class="hljs-attribute">realPlayer</span>":<span class="hljs-value"><span class="hljs-literal">true</span></span>,
+   "<span class="hljs-attribute">rsaAssigned</span>":<span class="hljs-value"><span class="hljs-literal">false</span></span>,
+   "<span class="hljs-attribute">screenName</span>":<span class="hljs-value"><span class="hljs-string">"sntokenguy1"</span></span>,
+   "<span class="hljs-attribute">serverTimeUTC</span>":<span class="hljs-value"><span class="hljs-string">"/Date(1415267177020)/"</span></span>,
+   "<span class="hljs-attribute">serviceSessionId</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">sessionToken</span>":<span class="hljs-value">[SessionToken]</span>,
+   "<span class="hljs-attribute">ssoToken</span>":<span class="hljs-value">[SsoToken]</span>,
+   "<span class="hljs-attribute">userName</span>":<span class="hljs-value"><span class="hljs-string">"tokenguy1"</span></span>,
+   "<span class="hljs-attribute">userToken</span>":<span class="hljs-value">[UserToken]</span>,
+   "<span class="hljs-attribute">workflowType</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+   "<span class="hljs-attribute">workflowKeys</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">superCookie</span>":<span class="hljs-value"><span class="hljs-string">"topSecret"</span>
+</span>}</code></pre></li><li data-toggle="collapse" data-target="#07abfb156dcbf7f4ff74b5ac75d188de" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>403</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span></strong></li><li id="07abfb156dcbf7f4ff74b5ac75d188de" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Body</div><code>{
+  "<span class="hljs-attribute">code</span>": <span class="hljs-value"><span class="hljs-number">600</span></span>,
+  "<span class="hljs-attribute">message</span>": <span class="hljs-value"><span class="hljs-string">"Authentication failed"</span>
+</span>}</code></pre></li></ul></section><h3 id="authentication-pid-login">PID-Login&nbsp;<a href="#authentication-pid-login"><i class="fa fa-link"></i></a></h3><p>PID based login for DanID based labels.</p>
+<section id="authentication-pid-login-post" class="panel panel-success"><div class="panel-heading"><button onclick="Invoker(&quot;authentication-pid-login-post-invoker&quot;);" class="btn btn-xs btn-warning actionTryIt">INVOKE<span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></button><div class="actionMethod">                               <a href="#authentication-pid-login-post" class="btn btn-xs btn-success">POST</a></div><div style="overflow:hidden"><div class="action">/Login/PID</div></div><div class="actionDescription"><span style="text-transform: lowercase">Login a User</span></div></div><ul style="display:none;" id="authentication-pid-login-post-invoker" class="list-group invoker"><li class="list-group-item"><div class="invoker-title"><strong>Invoker</strong><span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></div><!-- get first request sample and check if json--><div role="alert" style="display:none;" class="tokenAlert alert alert-danger"><strong>Oh snap!   </strong>You are missing required tokens to perform this operation.<button data-toggle="modal" data-target="#TokenManagement" class="btn btn-s btn-danger">Token Management<span aria-hidden="true" class="glyphicon glyphicon-pencil withtext"></span></button></div><div role="alert" style="display:none;" class="alert alert-danger alert-dismissible parameterWarning"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><strong>Error!   </strong>It seems the parameter description does not fit the endpoint.<br>In order for the invoker to work, <strong>all </strong>parameters must be documented in the correct order.</div><pre><div class="section unselectable">Request</div><code id="authentication-pid-login-post-invoker-request" class="invokerRequestCode"><div style="display: none;" class="uriTemplate">/Authentication.svc/Login/PID</div><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/Login/PID</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">[Host]/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br></code><hr><div id="authentication-pid-login-post-invoker_editor" class="requestBodyEditor">{
+    &quot;pid&quot;: &quot;123asdf&quot;,
+    &quot;language&quot;: &quot;EN&quot;,
+    &quot;username&quot;: &quot;denMark&quot;,
+    &quot;password&quot;: &quot;passme&quot;,
+    &quot;deviceId&quot;: &quot;ABC123&quot;,
+    &quot;ucid&quot;: &quot;12345abcd&quot;,
+    &quot;fingerprint&quot;:{ /*see login*/ }
+}
+</div><button onclick="CallAPI(&quot;authentication-pid-login-post-invoker&quot;,&quot;/V3&quot;,&quot;POST&quot;);" class="btn btn-l btn-primary pull-right">SEND<span aria-hidden="true" class="glyphicon glyphicon-send withtext"></span></button><button id="authentication-pid-login-post-invoker-clear" style="display:none;" onclick="Clear(&quot;authentication-pid-login-post-invoker&quot;);" class="btn btn-l btn-default pull-right invoker-clear"><span aria-hidden="true" class="glyphicon glyphicon-trash"></span></button></pre><div role="alert" style="display:none;" class="rememberTokens alert alert-success alert-dismissible"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><div><strong>New Tokens!   </strong><br>The response contains a <strong>SessionToken </strong>and <strong>UserToken</strong>.<br>Would you like to remember these for upcoming requests?<button class="btn btn-s btn-success pull-right remember">Remember<span aria-hidden="true" class="glyphicon glyphicon-floppy-save withtext"></span></button></div></div><pre id="authentication-pid-login-post-invoker-response" style="display:none;"><div class="section unselectable">Response</div><code id="authentication-pid-login-post-invoker-response-header"></code><hr><code id="authentication-pid-login-post-invoker-response-body"></code></pre></li></ul><div class="panel-body"><ul>
+<li>
+<p><code>pid</code>: (string) - The username of the account.</p>
+</li>
+<li>
+<p><code>username</code>: (optional, string) - The username of the account (required only when called directly after registration).</p>
+</li>
+<li>
+<p><code>username</code>: (optional, string) - The password of the account (required only when called directly after registration).</p>
+</li>
+<li>
+<p><code>language</code>: (optional, string) - The twoletter lanague code.</p>
+</li>
+<li>
+<p><code>deviceId</code>: (optional, string) - Can be used by mobile clients.</p>
+</li>
+<li>
+<p><code>ucid</code>: (optional, string)</p>
+</li>
+</ul>
+</div><ul class="list-group"><li data-toggle="collapse" data-target="#b82396ac8b9bf3434cca5718d3c6c374" class="list-group-item pull-right collapsed"><strong>Request<span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="b82396ac8b9bf3434cca5718d3c6c374" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/Login/PID</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">api.pos.com/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><br></code><hr><div class="section unselectable">Body</div><code><span class="hljs-collection">{
+    <span class="hljs-string">"pid"</span>: <span class="hljs-string">"123asdf"</span>,
+    <span class="hljs-string">"language"</span>: <span class="hljs-string">"EN"</span>,
+    <span class="hljs-string">"username"</span>: <span class="hljs-string">"denMark"</span>,
+    <span class="hljs-string">"password"</span>: <span class="hljs-string">"passme"</span>,
+    <span class="hljs-string">"deviceId"</span>: <span class="hljs-string">"ABC123"</span>,
+    <span class="hljs-string">"ucid"</span>: <span class="hljs-string">"12345abcd"</span>,
+    <span class="hljs-string">"fingerprint"</span>:<span class="hljs-collection">{ /*see login*/ }</span>
+}</span></code></pre></li><li data-toggle="collapse" data-target="#33c030d1867ab57b983f2fc12244fd68" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>200</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="33c030d1867ab57b983f2fc12244fd68" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-status">HTTP/1.1 <span class="hljs-number">200</span> OK</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br></code><hr><div class="section unselectable">Body</div><code>{  
+   "<span class="hljs-attribute">Balance</span>":<span class="hljs-value">{  
+      "<span class="hljs-attribute">accountBalance</span>":<span class="hljs-value"><span class="hljs-number">1250.01</span></span>,
+      "<span class="hljs-attribute">accountCurrency</span>":<span class="hljs-value"><span class="hljs-string">"EUR"</span></span>,
+      "<span class="hljs-attribute">balanceForGameType</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">bonusWinningsRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">cashoutRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">cashoutableBalance</span>":<span class="hljs-value"><span class="hljs-number">1250.01</span></span>,
+      "<span class="hljs-attribute">depositRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">inPlayAmount</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">owedAmount</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">playMoneyBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">playMoneyInPlayAmount</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+      "<span class="hljs-attribute">releaseRestrictedBalance</span>":<span class="hljs-value"><span class="hljs-number">0</span>
+   </span>}</span>,
+   "<span class="hljs-attribute">ClaimValues</span>":<span class="hljs-value">[  
+      {  
+         "<span class="hljs-attribute">Key</span>":<span class="hljs-value"><span class="hljs-string">"SampleClaimKey"</span></span>,
+         "<span class="hljs-attribute">Value</span>":<span class="hljs-value"><span class="hljs-string">"SampleClaimValue"</span>
+      </span>}
+   ]</span>,
+   "<span class="hljs-attribute">PendingActions</span>":<span class="hljs-value">{  
+      "<span class="hljs-attribute">Actions</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+      "<span class="hljs-attribute">ordered</span>":<span class="hljs-value"><span class="hljs-literal">false</span>
+   </span>}</span>,
+   "<span class="hljs-attribute">PostLoginValues</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">SogeiCustomerId</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">accountCategoryId</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+   "<span class="hljs-attribute">accountId</span>":<span class="hljs-value"><span class="hljs-number">110750845</span></span>,
+   "<span class="hljs-attribute">globalSessionId</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">language</span>":<span class="hljs-value"><span class="hljs-string">"EN"</span></span>,
+   "<span class="hljs-attribute">lastLoginUTC</span>":<span class="hljs-value"><span class="hljs-string">"/Date(0)/"</span></span>,
+   "<span class="hljs-attribute">lastLogoutUTC</span>":<span class="hljs-value"><span class="hljs-string">"/Date(0)/"</span></span>,
+   "<span class="hljs-attribute">playerCategory</span>":<span class="hljs-value"><span class="hljs-number">1</span></span>,
+   "<span class="hljs-attribute">realPlayer</span>":<span class="hljs-value"><span class="hljs-literal">true</span></span>,
+   "<span class="hljs-attribute">rsaAssigned</span>":<span class="hljs-value"><span class="hljs-literal">false</span></span>,
+   "<span class="hljs-attribute">screenName</span>":<span class="hljs-value"><span class="hljs-string">"sntokenguy1"</span></span>,
+   "<span class="hljs-attribute">serverTimeUTC</span>":<span class="hljs-value"><span class="hljs-string">"/Date(1415267177020)/"</span></span>,
+   "<span class="hljs-attribute">serviceSessionId</span>":<span class="hljs-value"><span class="hljs-literal">null</span></span>,
+   "<span class="hljs-attribute">sessionToken</span>":<span class="hljs-value">[SessionToken]</span>,
+   "<span class="hljs-attribute">ssoToken</span>":<span class="hljs-value">[SsoToken]</span>,
+   "<span class="hljs-attribute">userName</span>":<span class="hljs-value"><span class="hljs-string">"tokenguy1"</span></span>,
+   "<span class="hljs-attribute">userToken</span>":<span class="hljs-value">[UserToken]</span>,
+   "<span class="hljs-attribute">workflowType</span>":<span class="hljs-value"><span class="hljs-number">0</span></span>,
+   "<span class="hljs-attribute">workflowKeys</span>":<span class="hljs-value"><span class="hljs-literal">null</span>
+</span>}</code></pre></li><li data-toggle="collapse" data-target="#5210a4d32d92bd94c40554be0e9d8313" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>403</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span></strong></li><li id="5210a4d32d92bd94c40554be0e9d8313" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Body</div><code>{
+  "<span class="hljs-attribute">code</span>": <span class="hljs-value"><span class="hljs-number">600</span></span>,
+  "<span class="hljs-attribute">message</span>": <span class="hljs-value"><span class="hljs-string">"Authentication failed"</span>
+</span>}</code></pre></li></ul></section><h3 id="authentication-logout">Logout&nbsp;<a href="#authentication-logout"><i class="fa fa-link"></i></a></h3><section id="authentication-logout-post" class="panel panel-success"><div class="panel-heading"><button onclick="Invoker(&quot;authentication-logout-post-invoker&quot;);" class="btn btn-xs btn-warning actionTryIt">INVOKE<span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></button><div class="actionMethod">                               <a href="#authentication-logout-post" class="btn btn-xs btn-success">POST</a></div><div style="overflow:hidden"><div class="action">/Logout</div></div><div class="actionDescription"><span style="text-transform: lowercase">Logout a User</span></div></div><ul style="display:none;" id="authentication-logout-post-invoker" class="list-group invoker"><li class="list-group-item"><div class="invoker-title"><strong>Invoker</strong><span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></div><!-- get first request sample and check if json--><div role="alert" style="display:none;" class="tokenAlert alert alert-danger"><strong>Oh snap!   </strong>You are missing required tokens to perform this operation.<button data-toggle="modal" data-target="#TokenManagement" class="btn btn-s btn-danger">Token Management<span aria-hidden="true" class="glyphicon glyphicon-pencil withtext"></span></button></div><div role="alert" style="display:none;" class="alert alert-danger alert-dismissible parameterWarning"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><strong>Error!   </strong>It seems the parameter description does not fit the endpoint.<br>In order for the invoker to work, <strong>all </strong>parameters must be documented in the correct order.</div><pre><div class="section unselectable">Request</div><code id="authentication-logout-post-invoker-request" class="invokerRequestCode"><div style="display: none;" class="uriTemplate">/Authentication.svc/Logout</div><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/Logout</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">[Host]/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br><span class="hljs-attribute">x-bwin-session-token</span>: <span class="hljs-string">[SessionToken]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br><span class="hljs-attribute">x-bwin-user-token</span>: <span class="hljs-string">[UserToken]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br></code><button onclick="CallAPI(&quot;authentication-logout-post-invoker&quot;,&quot;/V3&quot;,&quot;POST&quot;);" class="btn btn-l btn-primary pull-right">SEND<span aria-hidden="true" class="glyphicon glyphicon-send withtext"></span></button><button id="authentication-logout-post-invoker-clear" style="display:none;" onclick="Clear(&quot;authentication-logout-post-invoker&quot;);" class="btn btn-l btn-default pull-right invoker-clear"><span aria-hidden="true" class="glyphicon glyphicon-trash"></span></button></pre><div role="alert" style="display:none;" class="rememberTokens alert alert-success alert-dismissible"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><div><strong>New Tokens!   </strong><br>The response contains a <strong>SessionToken </strong>and <strong>UserToken</strong>.<br>Would you like to remember these for upcoming requests?<button class="btn btn-s btn-success pull-right remember">Remember<span aria-hidden="true" class="glyphicon glyphicon-floppy-save withtext"></span></button></div></div><pre id="authentication-logout-post-invoker-response" style="display:none;"><div class="section unselectable">Response</div><code id="authentication-logout-post-invoker-response-header"></code><hr><code id="authentication-logout-post-invoker-response-body"></code></pre></li></ul><ul class="list-group"><li data-toggle="collapse" data-target="#c287a715c469d0a2ac6a440bb43e70b9" class="list-group-item pull-right collapsed"><strong>Request<span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="c287a715c469d0a2ac6a440bb43e70b9" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/Logout</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">api.pos.com/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><br><span class="hljs-attribute">x-bwin-session-token</span>: <span class="hljs-string">[SessionToken]</span><br><span class="hljs-attribute">x-bwin-user-token</span>: <span class="hljs-string">[UserToken]</span><br></code></pre></li><li data-toggle="collapse" data-target="#62c1356c65d70aea8ed896a5f93b78cb" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>200</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="62c1356c65d70aea8ed896a5f93b78cb" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-status">HTTP/1.1 <span class="hljs-number">200</span> OK</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br></code></pre></li><li data-toggle="collapse" data-target="#d139ff3144585768a5846450e995b287" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>400</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="d139ff3144585768a5846450e995b287" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-status">HTTP/1.1 <span class="hljs-number">400</span> Bad Request</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br></code><hr><div class="section unselectable">Body</div><code>{
+  "<span class="hljs-attribute">code</span>": <span class="hljs-value"><span class="hljs-number">201</span></span>,
+  "<span class="hljs-attribute">message</span>": <span class="hljs-value"><span class="hljs-string">"Invalid user security token"</span>
+</span>}</code></pre></li></ul></section><h3 id="authentication-cancel-workflow">Cancel Workflow&nbsp;<a href="#authentication-cancel-workflow"><i class="fa fa-link"></i></a></h3><section id="authentication-cancel-workflow-post" class="panel panel-success"><div class="panel-heading"><button onclick="Invoker(&quot;authentication-cancel-workflow-post-invoker&quot;);" class="btn btn-xs btn-warning actionTryIt">INVOKE<span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></button><div class="actionMethod">                               <a href="#authentication-cancel-workflow-post" class="btn btn-xs btn-success">POST</a></div><div style="overflow:hidden"><div class="action">/CancelWorkflow</div></div><div class="actionDescription"><span style="text-transform: lowercase">Cancel a workflow</span></div></div><ul style="display:none;" id="authentication-cancel-workflow-post-invoker" class="list-group invoker"><li class="list-group-item"><div class="invoker-title"><strong>Invoker</strong><span aria-hidden="true" class="glyphicon glyphicon-transfer"></span></div><!-- get first request sample and check if json--><div role="alert" style="display:none;" class="tokenAlert alert alert-danger"><strong>Oh snap!   </strong>You are missing required tokens to perform this operation.<button data-toggle="modal" data-target="#TokenManagement" class="btn btn-s btn-danger">Token Management<span aria-hidden="true" class="glyphicon glyphicon-pencil withtext"></span></button></div><div role="alert" style="display:none;" class="alert alert-danger alert-dismissible parameterWarning"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><strong>Error!   </strong>It seems the parameter description does not fit the endpoint.<br>In order for the invoker to work, <strong>all </strong>parameters must be documented in the correct order.</div><pre><div class="section unselectable">Request</div><code id="authentication-cancel-workflow-post-invoker-request" class="invokerRequestCode"><div style="display: none;" class="uriTemplate">/Authentication.svc/CancelWorkflow</div><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/CancelWorkflow</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">[Host]/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br><span class="hljs-attribute">x-bwin-session-token</span>: <span class="hljs-string">[SessionToken]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br><span class="hljs-attribute">x-bwin-user-token</span>: <span class="hljs-string">[UserToken]</span><a data-toggle="modal" data-target="#TokenManagement"><span aria-hidden="true" class="glyphicon glyphicon-pencil tokenEdit"></span></a><br></code><button onclick="CallAPI(&quot;authentication-cancel-workflow-post-invoker&quot;,&quot;/V3&quot;,&quot;POST&quot;);" class="btn btn-l btn-primary pull-right">SEND<span aria-hidden="true" class="glyphicon glyphicon-send withtext"></span></button><button id="authentication-cancel-workflow-post-invoker-clear" style="display:none;" onclick="Clear(&quot;authentication-cancel-workflow-post-invoker&quot;);" class="btn btn-l btn-default pull-right invoker-clear"><span aria-hidden="true" class="glyphicon glyphicon-trash"></span></button></pre><div role="alert" style="display:none;" class="rememberTokens alert alert-success alert-dismissible"><button data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">×</span></button><div><strong>New Tokens!   </strong><br>The response contains a <strong>SessionToken </strong>and <strong>UserToken</strong>.<br>Would you like to remember these for upcoming requests?<button class="btn btn-s btn-success pull-right remember">Remember<span aria-hidden="true" class="glyphicon glyphicon-floppy-save withtext"></span></button></div></div><pre id="authentication-cancel-workflow-post-invoker-response" style="display:none;"><div class="section unselectable">Response</div><code id="authentication-cancel-workflow-post-invoker-response-header"></code><hr><code id="authentication-cancel-workflow-post-invoker-response-body"></code></pre></li></ul><ul class="list-group"><li data-toggle="collapse" data-target="#2fda5158a75661501a565a9f87636cd4" class="list-group-item pull-right collapsed"><strong>Request<span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="2fda5158a75661501a565a9f87636cd4" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-request">POST <span class="hljs-string">/Authentication.svc/CancelWorkflow</span> HTTP/1.1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-string">api.pos.com/V3</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">[AccessId]</span><br><span class="hljs-attribute">x-bwin-session-token</span>: <span class="hljs-string">[SessionToken]</span><br><span class="hljs-attribute">x-bwin-user-token</span>: <span class="hljs-string">[UserToken]</span><br></code></pre></li><li data-toggle="collapse" data-target="#b6a308733b85f47dcbef8082348000bc" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>200</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="b6a308733b85f47dcbef8082348000bc" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-status">HTTP/1.1 <span class="hljs-number">200</span> OK</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br></code></pre></li><li data-toggle="collapse" data-target="#36720c6868ffea6f79635fcd2955e101" class="list-group-item pull-right collapsed"><strong>Response&nbsp;&nbsp;<code>404</code><span class="toggle pull-right"><span class="open fa fa-angle-down"></span><span class="closed fa fa-angle-right"></span></span><span class="label label-default json">JSON</span></strong></li><li id="36720c6868ffea6f79635fcd2955e101" class="list-group-item panel-collapse collapse"><pre><div class="section unselectable">Headers</div><code><span class="hljs-status">HTTP/1.1 <span class="hljs-number">404</span> Not Found</span><br><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br></code><hr><div class="section unselectable">Body</div><code>{
+  "<span class="hljs-attribute">code</span>": <span class="hljs-value"><span class="hljs-number">630</span></span>,
+  "<span class="hljs-attribute">message</span>": <span class="hljs-value"><span class="hljs-string">"No workflow pending"</span>
+</span>}</code></pre></li></ul></section><h3 id="authentication-authorization">Authorization&nbsp;<a href="#authentication-authorization"><i class="fa fa-link"></i></a></h3><p>If there is a pending workflow for a user, this user is authenticated but not authorized. It is not possible to call all PosAPI endpoints in this user state, but only all workflow relevant endpoints – e.g. finalizeWorkflow, get and set the screen name …</p>
+<h4 id="header-authentication-1">Authentication <a class="permalink" href="#header-authentication-1" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+<th>Values/Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>600</code></td>
+<td>Authentication failed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>611</code></td>
+<td>User Just Blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>612</code></td>
+<td>Password expired</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>613</code></td>
+<td>Account hacking suspect</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>614</code></td>
+<td>User too young</td>
+<td>Only for BE users</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>615</code></td>
+<td>Token sent with password</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>690</code></td>
+<td>Missing Language parameter</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>692</code></td>
+<td>Invalid handshake session key</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>698</code></td>
+<td>User currency unknown</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>629</code></td>
+<td>Device is blocked</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-responsible-gaming">Responsible Gaming <a class="permalink" href="#header-responsible-gaming" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+<th>Values/Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>601</code></td>
+<td>RG Closed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>602</code></td>
+<td>RG Cool off</td>
+<td><pre>{<br/>  “Key”:“ReopenDate”,<br/>  “Value”:“2020-01-01T00:00:00”<br/>}</pre></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>603</code></td>
+<td>Player is temporarily blocked</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-login-1">Login <a class="permalink" href="#header-login-1" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+<th>Values/Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>605</code></td>
+<td>Password blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>606</code></td>
+<td>Token blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>607</code></td>
+<td>SqSa blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>608</code></td>
+<td>Sll blocked</td>
+<td><pre>{<br/>  “Key”:“SllContactNo”,<br/>  “Value”:“122345-23”<br/> }</pre></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>609</code></td>
+<td>Manually blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>610</code></td>
+<td>Unknown technical error</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-kyc">KYC <a class="permalink" href="#header-kyc" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>621</code></td>
+<td>Not KYC verified and grace period expired</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>622</code></td>
+<td>KYC blocked category</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>623</code></td>
+<td>KYC suspended category</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>624</code></td>
+<td>KYC closed category</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>625</code></td>
+<td>KYC doc not verified</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>626</code></td>
+<td>KYC id not verified</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>627</code></td>
+<td>KYC technical error</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>628</code></td>
+<td>Maximum KYC attempts exceeded</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-unfinished-registration">Unfinished Registration <a class="permalink" href="#header-unfinished-registration" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+<th>Values/Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>635</code></td>
+<td>Unfinished registration</td>
+<td>Depending on Brand configuration – <a href="#authentication-workflow-ids">WorkflowID 7</a> or this error is fired.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-migration">Migration <a class="permalink" href="#header-migration" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>650</code></td>
+<td>User migration update profile failed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>651</code></td>
+<td>User migration update profile suspened</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>652</code></td>
+<td>User migration technical error</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>653</code></td>
+<td>User migration duplicate account</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-dateofbirth">DateOfBirth <a class="permalink" href="#header-dateofbirth" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>655</code></td>
+<td>Date of birth blocked</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-max-login">Max Login <a class="permalink" href="#header-max-login" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>656</code></td>
+<td>Maximum of logged in users reached</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-inactive-player">Inactive Player <a class="permalink" href="#header-inactive-player" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>657</code></td>
+<td>Player has been inactive for more than 6 months.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-user-attributes">User Attributes <a class="permalink" href="#header-user-attributes" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>660</code></td>
+<td>Fraud</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>661</code></td>
+<td>Colluder</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>662</code></td>
+<td>Closed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>663</code></td>
+<td>Suspicious</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>664</code></td>
+<td>Closed on request</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>665</code></td>
+<td>Reopened on request</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>666</code></td>
+<td>RG closed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>667</code></td>
+<td>Arjel blocked</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>668</code></td>
+<td>Permanent Closed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>669</code></td>
+<td>Sportsbook Fraud</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-suspicious-location">Suspicious Location <a class="permalink" href="#header-suspicious-location" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>670</code></td>
+<td>SLL max failed attempts reached</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>671</code></td>
+<td>SLL validation failed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>672</code></td>
+<td>SLL contact update success</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-ip-ucid-block">IP/UCID Block <a class="permalink" href="#header-ip-ucid-block" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+<th>Values/Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>675</code></td>
+<td>IP blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>676</code></td>
+<td>UCID blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>677</code></td>
+<td>Subnet blocked</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>678</code></td>
+<td>Country blocked</td>
+<td>For SH:<br/><pre>{<br/>  “Key”:“SubErrorCode”,<br/>  “Value”:“64073”<br/> }</pre></td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-security-token">Security Token <a class="permalink" href="#header-security-token" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>680</code></td>
+<td>Invalid security token password entered</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>681</code></td>
+<td>Display security token player block message</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>682</code></td>
+<td>Security token not required for login</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>683</code></td>
+<td>Display OTP screen</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>684</code></td>
+<td>Security Token screen expired</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>685</code></td>
+<td>Invalid security token code entered</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>686</code></td>
+<td>Unknown error when validating security token information</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>687</code></td>
+<td>Security Token information required</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-workflow">Workflow <a class="permalink" href="#header-workflow" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>630</code></td>
+<td>No Workflow pending</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>631</code></td>
+<td>Backend Error - User logged out</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-autologin">AutoLogin <a class="permalink" href="#header-autologin" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>640</code></td>
+<td>Service session creation failed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>641</code></td>
+<td>Interceptors pending launch url</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>642</code></td>
+<td>Login service unavailable</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>643</code></td>
+<td>Cross domain</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>644</code></td>
+<td>General Error</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-sqsa-login-interceptor">SQSA Login Interceptor <a class="permalink" href="#header-sqsa-login-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1601</code></td>
+<td>SqSa Failure Invalid data</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1602</code></td>
+<td>SqSa Failure Threshold reached</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1603</code></td>
+<td>Unknown technical error</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-user-acknowledgement-interceptor">User Acknowledgement Interceptor <a class="permalink" href="#header-user-acknowledgement-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1610</code></td>
+<td>User acknowledgement Unknown error</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-kyc-be-interceptor">KYC BE Interceptor <a class="permalink" href="#header-kyc-be-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1800</code></td>
+<td>Invalid passport entered</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1801</code></td>
+<td>Invalid profession entered</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1802</code></td>
+<td>National registration number and passport are empty</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1803</code></td>
+<td>Invalid passport length</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1804</code></td>
+<td>Invalid place of birth</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1805</code></td>
+<td>Invalid national registration number length</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1806</code></td>
+<td>Invalid place of birth length</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1807</code></td>
+<td>Invalid national registration number</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1808</code></td>
+<td>User is blacklisted</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1809</code></td>
+<td>User already registered with regulatory</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1810</code></td>
+<td>Unknown technical error</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-strongauth-interceptor">StrongAuth Interceptor <a class="permalink" href="#header-strongauth-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+<th>Values/Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1902</code></td>
+<td>Otp regeneration failed</td>
+<td><pre>[{<br/>“Key”:“USER_OTP_CURRENT_REGENERATION_COUNT”,<br/>“Value”:“1”<br/>},<br/>{<br/>“Key”:“OTP_MAX_REGENERATE_COUNT”,<br/>“Value”:“2”<br/>}]</pre></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1903</code></td>
+<td>Invalid data</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1905</code></td>
+<td>Otp cooled off</td>
+<td><pre>[{<br/>“Key”:“OTP_MAX_ATTEMPT_COUNT”,<br/>“Value”:“5”<br/>},<br/> {<br/>“Key”:“OTP_COOL_OFF_TIME”,<br/>“Value”:“30”<br/> },<br/> {<br/>  “Key”:“OTP_MAX_REGENERATE_COUNT”,<br/>“Value”:“2”<br/> }]</pre></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1906</code></td>
+<td>Otp max regeneration reached</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1907</code></td>
+<td>Otp expired</td>
+<td><pre>[{<br/>“Key”:“OTP_MAX_ATTEMPT_COUNT”,<br/>“Value”:“5”<br/>},<br/> {<br/>“Key”:“OTP_CURRENT_FAILED_ATTEMPTS”,<br/>“Value”:“1”<br/> },<br/> {<br/>  “Key”:“OTP_MAX_REGENERATE_COUNT”,<br/>“Value”:“2”<br/> }]</pre></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1909</code></td>
+<td>Unknown technical error</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>500</code></td>
+<td style="text-align:center"><code>1908</code></td>
+<td>Backend technical error</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-funds-regulation-interceptor">Funds Regulation Interceptor <a class="permalink" href="#header-funds-regulation-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+<th>Values/Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1630</code></td>
+<td>Terms and Condition update failed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1631</code></td>
+<td>Fund Protection update failed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1632</code></td>
+<td>Daily Limit update failed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1633</code></td>
+<td>Weekly Limit update failed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1634</code></td>
+<td>Monthly Limit update failed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1635</code></td>
+<td>Invalid Daily Limit</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1636</code></td>
+<td>Invalid Weekly Limit</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1637</code></td>
+<td>Invalid Monthly Limit</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1638</code></td>
+<td>Overall update failed</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1639</code></td>
+<td>Maximum limit exceeded</td>
+<td><pre>[{<br/>“Key”:“MAXIMUMLIMIT”,<br/>“Value”:“1000”<br/>},<br/>{<br/>“Key”:“CURRENCY”,<br/>“Value”:“EUR”<br/>}]</pre></td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-kyc-sh-interceptor">KYC SH Interceptor <a class="permalink" href="#header-kyc-sh-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1640</code></td>
+<td>Unknown technical error</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1641</code></td>
+<td>Invalid length for city of birth</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1642</code></td>
+<td>City of birth is null or empty</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1643</code></td>
+<td>Nationality is null or empty</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-denmark-blacklist-check-interceptor">Denmark Blacklist Check Interceptor <a class="permalink" href="#header-denmark-blacklist-check-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1645</code></td>
+<td>Unknown technical error</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>1646</code></td>
+<td>User blocked by Danish blacklist</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-updatesqsa-interceptor">UpdateSQSA Interceptor <a class="permalink" href="#header-updatesqsa-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1620</code></td>
+<td>UpdateSqSa Failure Invalid data</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1621</code></td>
+<td>UpdateSqSa update failed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1622</code></td>
+<td>Unknown technical error</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-dkpasswordcheck">DkPasswordCheck <a class="permalink" href="#header-dkpasswordcheck" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>500</code></td>
+<td>Password does not match criteria</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>500</code></td>
+<td style="text-align:center"><code>101</code></td>
+<td>Unknown error code: [number]</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-pidverification">PidVerification <a class="permalink" href="#header-pidverification" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1662</code></td>
+<td>User credentials and PID are required</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-logincountlimit">LoginCountLimit <a class="permalink" href="#header-logincountlimit" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1666</code></td>
+<td>Login count limit updated and login restricted</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-updateemail-interceptor">UpdateEmail Interceptor <a class="permalink" href="#header-updateemail-interceptor" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>500</code></td>
+<td style="text-align:center"><code>4301</code></td>
+<td>Technical error while updating email</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>4302</code></td>
+<td>Email already in use</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>4303</code></td>
+<td>Old email submitted again</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>4304</code></td>
+<td>Email address invalid</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-intra-migration">Intra Migration <a class="permalink" href="#header-intra-migration" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>1690</code></td>
+<td>User has been migrated to Premiumbull</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-secure-login">Secure Login <a class="permalink" href="#header-secure-login" aria-hidden="true">¶</a></h4>
+<p>Sub error codes:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">SubError</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>11</code></td>
+<td>OTP Entered by player has expired.</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>12</code></td>
+<td>Invalid OTP ID /Request ID.</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>13</code></td>
+<td>Invalid OTP code or ID</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>14</code></td>
+<td>Maximum OTP validation count reached</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>15</code></td>
+<td>OTP validation failed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>16</code></td>
+<td>Mobile number entered by user is invalid.</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>18</code></td>
+<td>Regeneration of new OTP  failed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>19</code></td>
+<td>Generation of  new OTP  failed</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>20</code></td>
+<td>OTP code generation is success</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>21</code></td>
+<td>User is in cool off state</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>22</code></td>
+<td>Maximum OTP regeneration count reached</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>23</code></td>
+<td>ID /Request ID has expired.</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>24</code></td>
+<td>Communication failure from OTP Service.</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>111</code></td>
+<td>Mobile number is empty.</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>112</code></td>
+<td>Mobile number update failed.</td>
+</tr>
+</tbody>
+</table>
+<p>Error codes:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">ErrorCode</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>119</code></td>
+<td>Regular OTP flow</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>122</code></td>
+<td>Ask user to opt in /out / remind later</td>
+</tr>
+</tbody>
+</table>
+<p>Workflow keys:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Workflow key</th>
+<th>Description</th>
+<th>When to send</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">REQUEST_ID</td>
+<td>The OTP request id</td>
+<td>With every request</td>
+</tr>
+<tr>
+<td style="text-align:center">otpCode</td>
+<td>The received otp code</td>
+<td>on OTP verify</td>
+</tr>
+<tr>
+<td style="text-align:center">sendThroughEmail</td>
+<td>boolean if resend should be by email</td>
+<td>to resend OTP</td>
+</tr>
+<tr>
+<td style="text-align:center">OPT_FLAG</td>
+<td>If the user opts in or out of 2FA. Values are “OPT_IN”, “OPT_OUT” or “REMIND_ME_LATER”</td>
+<td>errorCode 122</td>
+</tr>
+<tr>
+<td style="text-align:center">countryCode</td>
+<td>mobile country code of the user</td>
+<td>If OPT_FLAG is “OPT_IN”</td>
+</tr>
+<tr>
+<td style="text-align:center">Mobilenumber</td>
+<td>mobile number of the user</td>
+<td>If OPT_FLAG is “OPT_IN”</td>
+</tr>
+</tbody>
+</table>
+<h4 id="header-general">General <a class="permalink" href="#header-general" aria-hidden="true">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>695</code></td>
+<td>User Currency invalid</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>696</code></td>
+<td>User Country invalid</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authentication-workflow-ids">Workflow IDs&nbsp;<a href="#authentication-workflow-ids"><i class="fa fa-link"></i></a></h3><table>
+<thead>
+<tr>
+<th style="text-align:center">ID</th>
+<th>Workflow Name</th>
+<th>API endpoints to resolve the workflow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>0</code></td>
+<td>No Workflow pending</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>1</code></td>
+<td>TermsAndConditionsUpdated</td>
+<td><a href="#kyc-schleswig-holstein-details">Sh/Details</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a> (To set maidenname in <em>BwinSh</em>)<br/><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>2</code></td>
+<td>Kyc</td>
+<td><a href="#kyc-kyc-status">KycStatus</a>, <a href="#kyc-kyc-data">KycData</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>3</code></td>
+<td>ScreenName</td>
+<td><a href="#account-screenname">ScreenName</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>4</code></td>
+<td>SLL (Suspicious Location Login)</td>
+<td><a href="#account-ssl-questions">SllQuestions</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>5</code></td>
+<td>UserMigration</td>
+<td><a href="#account-migrate-user">MigrateUser</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>6</code></td>
+<td>SecurityToken</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a> with keys <code>countryCode</code> and <code>mobilenumber</code>, then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a> to accept migration to OTP; <a href="#authentication-skipworkflow">SkipWorkflow</a> to stay with RSA key</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>7</code></td>
+<td>FinalizeRegistration</td>
+<td><a href="#account-userdata">UserData</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>8</code></td>
+<td>BirthLocation</td>
+<td><a href="#kyc-birth-location">BirthLocation</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>9</code></td>
+<td>SpainMigration</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>10</code></td>
+<td>SqSaLogin</td>
+<td><a href="#authentication-securityanswers">SecurityAnswers</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>11</code></td>
+<td>UserAcknowledgement</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>12</code></td>
+<td>KycBe</td>
+<td><a href="#kyc-belgium-details">Be/Details</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>13</code></td>
+<td>StrongAuth</td>
+<td><a href="#authentication-strongauthentication">StrongAuthentication</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a><br/><a href="#authentication-finalize-workflow">FinalizeWorkflow</a> (Password regeneration)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>14</code></td>
+<td>PremiumMigrationOffer</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a> (user wants to migrate)<br/><a href="#authentication-skipworkflow">SkipWorkflow</a> (user doesn’t want to migrate)<br/>See <a href="#authentication-postlogin-values">PostLostinValues</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>15</code></td>
+<td>PremiumMigrationCompletion</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a> (if the user gets redirected to <em>Premium</em>, Logout should be called afterwards by frontend)<br/>See <a href="#authentication-postlogin-values">PostLostinValues</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>16</code></td>
+<td>UpdateSqSa</td>
+<td><a href="#authentication-securityanswers">SecurityAnswers</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>17</code></td>
+<td>PremiumMigrationInformation</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>18</code></td>
+<td>KycUk</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>19</code></td>
+<td>FundsRegulation</td>
+<td><a href="#account-uk-regulation-data">Uk/RegulationData</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>20</code></td>
+<td>ItRegulationKO</td>
+<td><a href="#account-italian-user-data">It/UserData</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a><br/><a href="#authentication-skipworkflow">SkipWorkflow</a> (remind later)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>21</code></td>
+<td>KycSh</td>
+<td><a href="#kyc-schleswig-holstein-details">Sh/Details</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>22</code></td>
+<td>IncorrectNrn</td>
+<td><a href="#kyc-national-registration-details">NationalRegistrationDetails</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a><br/>See <a href="#authentication-postlogin-values">PostLostinValues</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>23</code></td>
+<td>PostMigrationTermsAndConditions</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>24</code></td>
+<td>UserAcknowledgement2</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>25</code></td>
+<td>DepositLimitConfirmation</td>
+<td><a href="#account-depositlimitconfirmation">DepositLimitConfirmation</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a><br/><a href="#authentication-skipworkflow">SkipWorkflow</a> (remind later)<br/>See <a href="#authentication-postlogin-values">PostLostinValues</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>26</code></td>
+<td>RealityCheckPreferences</td>
+<td><a href="#account-realitycheckpreferences">RealityCheckPreferences</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>27</code></td>
+<td>TncCnpRo</td>
+<td><a href="#kyc-national-registration-details">NationalRegistrationDetails</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>28</code></td>
+<td>DkPasswordCheck</td>
+<td><a href="#authentication-password">Password</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>29</code></td>
+<td>TncAndIntendedGamingActivity</td>
+<td><a href="#kyc-denmark-details">Dk/Details</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a><br/>See <a href="#authentication-postlogin-values">PostLostinValues</a> for <em>TNC_AND_IGA_REASON</em></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>30</code></td>
+<td>PidVerification</td>
+<td><a href="#kyc-map-account-to-pid">Dk/MapAccountToPid</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>31</code></td>
+<td>DepositLimitIncrementConfirmation</td>
+<td><a href="#account-depositlimitincrementconfirmation">DepositLimitIncrementConfirmation</a>, <a href="#authentication-finalize-workflow">FinalizeWorkflow</a><br/><a href="#authentication-skipworkflow">SkipWorkflow</a> (remind later)<br/>See <a href="#authentication-postlogin-values">PostLostinValues</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>32</code></td>
+<td>DepositLimitVerification</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a> (user wants to proceed with document upload)<br/><a href="#authentication-skipworkflow">SkipWorkflow</a> (remind later)<br/>See <a href="#authentication-postlogin-values">PostLoginValues</a> (<em>DEPOSIT_GRACE_DAYS</em>)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>33</code></td>
+<td>LoginCountLimit</td>
+<td><a href="#responsible-gaming-player-limits-post">Limits/Player</a> and <a href="#authentication-logout">Logout</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>34</code></td>
+<td>PlayerLimits</td>
+<td><a href="#responsible-gaming-player-limits-post">Limits/Player</a> and <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>35</code></td>
+<td>AdditionalInfo</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a> (keys <code>birthNumber</code>, <code>nationality</code>, <code>idCardNumber</code>, <code>idCardValidFrom</code>, <code>idCardValidUntil</code>), <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>36</code></td>
+<td>LoginDurationExceeded</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a> or <a href="#responsible-gaming-player-limits-delete">Limits/Player</a> (user wants to opt out (7days waiting period))<br/> and <a href="#authentication-logout">Logout</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>37</code></td>
+<td>LoginCooloff</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a> or <a href="#responsible-gaming-player-limits-delete">Limits/Player</a> (user wants to opt out (7days waiting period))<br/> and <a href="#authentication-logout">Logout</a> <br/>See <a href="#authentication-postlogin-values">PostLoginValues</a> (<em>WAIT_TIME_FOR_COOLOFF_END</em>)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>38</code></td>
+<td>TwoFactorAuthentication</td>
+<td>Ask user to setup otp flow. <a href="#authentication-two-factor-authentication-post">Update 2FA Preferences</a>, then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>39</code></td>
+<td>TwoFactorOtp</td>
+<td>Otp was sent to user, query for received Otp. <a href="#authentication-verify-2fa-otp">Verify 2FA Otp</a> or <a href="#authentication-resend-2fa-otp">Resend 2FA Otp</a>, then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>40</code></td>
+<td>RG Limits Test</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a> with key <code>testResult</code> as <code>PASS</code>, <code>FAIL</code> or <code>LATER</code>; then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>41</code></td>
+<td>KYC Germany</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a> to accept, <a href="#authentication-skipworkflow">SkipWorkflow</a> to remind later</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>42</code></td>
+<td>Nationality</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a> with key <code>nationality</code> (two-letter country code); then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>43</code></td>
+<td>UpdateEmail</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a> with key <code>newEmail</code>; then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>44</code></td>
+<td>Secure Login</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a>, then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a>. Watch the <code>subErrorCode</code> in response data (see above)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>45</code></td>
+<td>Captcha Confirm</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a>. Possible responses are Login forbidden (same as invalid username/pwd) or Login success</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>46</code></td>
+<td>Message Preferences Update</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a> with keys the same as the communication settings received as part of login response, then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>47</code></td>
+<td>France Kyc Reminder</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>48</code></td>
+<td>Gamestop UK RG Check</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>49</code></td>
+<td>Italy KYC Reminder</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>50</code></td>
+<td>Inta-migrated</td>
+<td>Not clear-able</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>51</code></td>
+<td>FrLicenseChange</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>52</code></td>
+<td>ShKycCheck</td>
+<td><a href="#authentication-finalize-workflow">FinalizeWorkflow</a></td>
+</tr>
+<tr>
+<td style="text-align:center"><code>53</code></td>
+<td>BeKycCheck</td>
+<td><a href="#authentication-add-workflow-data">WorkflowData</a> with updated user data, then <a href="#authentication-finalize-workflow">FinalizeWorkflow</a>; Or <a href="#authentication-skipworkflow">SkipWorkflow</a> to skip (if allowed)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authentication-postlogin-values">PostLogin Values&nbsp;<a href="#authentication-postlogin-values"><i class="fa fa-link"></i></a></h3><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MIGRATION_KYC_SUB_ERROR_CODE</code></td>
+<td><code>109</code></td>
+<td>KYC verification is not done. Third party service unavailable.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>110</code></td>
+<td>User Identity is incorrect, and KYC verification is failed.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>121</code></td>
+<td>KYC verification is all success.</td>
+</tr>
+<tr>
+<td><code>MIGRATION_WALLET_TRANSFER</code></td>
+<td><code>1</code></td>
+<td>Migration is success.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>2</code></td>
+<td>Failed</td>
+</tr>
+<tr>
+<td></td>
+<td><code>3</code></td>
+<td>Migration skipped -will be due to KYC verification failure.<br/>MIGRATION _KYC_SUB_ERROR_CODE will be available to know the reason, if required.</td>
+</tr>
+<tr>
+<td><code>MIGRATION_USER_PROFILE</code></td>
+<td><code>1</code></td>
+<td>Profile migration success.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>2</code></td>
+<td>Profile migration failed.</td>
+</tr>
+<tr>
+<td><code>MAX_KYC_ATTEMPTS_REACHED</code></td>
+<td><code>True</code> or <code>False</code></td>
+<td>Player reached the maximum attempts to get KYC verified.</td>
+</tr>
+<tr>
+<td><code>PLAYER_KYC_ATTEMPTS_LEFT</code></td>
+<td><code>Number</code></td>
+<td>How many times is user allowed to proceed without providing the required details</td>
+</tr>
+<tr>
+<td><code>STRONG_AUTH_TYPE</code></td>
+<td><code>ShowStrongAuth</code></td>
+<td>Password generated and mail sent successfully. Screen to enter password need to be shown to user.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>StrongAuthValidationFailed</code></td>
+<td>Password validation failed.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>StrongAuthRegenerationSuccess</code></td>
+<td>Password regenerated successfully and sent to user.</td>
+</tr>
+<tr>
+<td><code>OTP_MAX_ATTEMPT_COUNT</code></td>
+<td><code>Number</code></td>
+<td>Maximum threshold value for the password failure. After exceeding this threshold value the user will be in cool off state.</td>
+</tr>
+<tr>
+<td><code>OTP_MAX_REGENERATE_COUNT</code></td>
+<td><code>Number</code></td>
+<td>Maximum threshold value for password regeneration. Regeneration will be failed by Login Service if retry attempt exceeds this value in the session.</td>
+</tr>
+<tr>
+<td><code>OTP_CURRENT_FAILED_ATTEMPTS</code></td>
+<td><code>Number</code></td>
+<td>Current failure attempt count</td>
+</tr>
+<tr>
+<td><code>USER_OTP_CURRENT_REGENERATION_COUNT</code></td>
+<td><code>Number</code></td>
+<td>Current password regeneration count. Session specific.</td>
+</tr>
+<tr>
+<td><code>MIGRATION_STATUS</code></td>
+<td><code>OFFERED</code>, <code>COMPLETED</code>, <code>FAILED</code></td>
+<td>The current status of the Premium Migration. In step one this will be OFFERED, and depending of success/failure of the migration COMPLETED/FAILED will be returned in step two.</td>
+</tr>
+<tr>
+<td><code>MIGRATION_TYPE</code></td>
+<td><code>SOFT</code>, <code>SEMI_HARD</code>, <code>HARD</code></td>
+<td>The type of migration (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>MIGRATION_TARGET</code></td>
+<td>e.g. <code>pa</code></td>
+<td>The frontend id of the target label (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>MIGRATION_PRODUCT</code></td>
+<td>e.g. <code>CASINO</code></td>
+<td>The product id on the target label after migration (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>MESSAGE_TYPE</code></td>
+<td><code>messageTypeA</code>, <code>messageTypeB</code></td>
+<td>The type of message to be shown to the user (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>REWARD_TYPE</code></td>
+<td><code>1</code></td>
+<td>The reward is a <em>cash gift</em>. (Premium Migration)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>2</code></td>
+<td>The reward is a <em>deposit bonus</em>. (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>REWARD_CURRENCY</code></td>
+<td>e.g. <code>EUR</code>, <code>USD</code></td>
+<td>The currency of the reward. (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>REWARD_MAXVALUE</code></td>
+<td>e.g. <code>10.50</code></td>
+<td>The max bonus amount for <em>deposit bonus</em>, otherwise the absolute amount in case of <em>cash gift</em> (string representation of decimal value). (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>REWARD_PERCENTAGE</code></td>
+<td><code>0</code></td>
+<td>No reward percentage specified or available. (Premium Migration)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>1-100</code></td>
+<td>The reward percentage in case of <em>deposit bonus with percentage</em>. (Premium Migration)</td>
+</tr>
+<tr>
+<td><code>NO_OF_HOURS_LEFT</code></td>
+<td><code>1-72</code></td>
+<td>The hours the user has left to validate his account by uploading a document (for KYC UK workflow)</td>
+</tr>
+<tr>
+<td><code>BELGIUM_NRN_REASON</code></td>
+<td><code>0</code></td>
+<td>Default</td>
+</tr>
+<tr>
+<td></td>
+<td><code>1</code></td>
+<td>Invalid national registration number</td>
+</tr>
+<tr>
+<td></td>
+<td><code>2</code></td>
+<td>Invalid passport number</td>
+</tr>
+<tr>
+<td></td>
+<td><code>3</code></td>
+<td>An account with these details already exists</td>
+</tr>
+<tr>
+<td></td>
+<td><code>4</code></td>
+<td>An account doesn’t have both documents</td>
+</tr>
+<tr>
+<td></td>
+<td><code>9</code></td>
+<td>Unable to validate national registration or passport number due to technical issues</td>
+</tr>
+<tr>
+<td><code>LIMIT_CURRENCY</code></td>
+<td><code>EUR</code></td>
+<td>Currency of the deposit limit value</td>
+</tr>
+<tr>
+<td><code>LIMIT_DAILY_CURRENT</code></td>
+<td><code>80.00</code></td>
+<td>Current daily deposit limit</td>
+</tr>
+<tr>
+<td><code>LIMIT_DAILY_PENDING</code></td>
+<td><code>85.00</code></td>
+<td>Pending daily deposit limit</td>
+</tr>
+<tr>
+<td><code>LIMIT_WEEKLY_CURRENT</code></td>
+<td><code>500.00</code></td>
+<td>Current weekly deposit limit</td>
+</tr>
+<tr>
+<td><code>LIMIT_WEEKLY_PENDING</code></td>
+<td><code>600.00</code></td>
+<td>Pending weekly deposit limit</td>
+</tr>
+<tr>
+<td><code>LIMIT_MONTHLY_CURRENT</code></td>
+<td><code>2000.00</code></td>
+<td>Current monthly deposit limit</td>
+</tr>
+<tr>
+<td><code>LIMIT_MONTHLY_PENDING</code></td>
+<td><code>2500.00</code></td>
+<td>Pending monthly deposit limit</td>
+</tr>
+<tr>
+<td><code>RG_DEPOSIT_LIMIT_LEVEL_CHANGE</code></td>
+<td><code>true</code> or <code>false</code></td>
+<td>Whether the limit change resulted in a level change for the user (differnt UI to be displayed)</td>
+</tr>
+<tr>
+<td><code>TNC_AND_IGA_REASON</code></td>
+<td><code>0</code></td>
+<td>Tnc Acceptance and Intended Gaming Activity missing</td>
+</tr>
+<tr>
+<td></td>
+<td><code>1</code></td>
+<td>Tnc Acceptance missing</td>
+</tr>
+<tr>
+<td></td>
+<td><code>2</code></td>
+<td>Intended Gaming Activity missing</td>
+</tr>
+<tr>
+<td><code>DEPOSIT_GRACE_DAYS</code></td>
+<td><code>42</code></td>
+<td>Number of days left to get fully verified</td>
+</tr>
+<tr>
+<td><code>LEFT_OVER_DAILY_LOGIN_DURATION</code></td>
+<td><code>1234</code></td>
+<td>Remaining session time until logout (in seconds)</td>
+</tr>
+<tr>
+<td><code>WAIT_TIME_FOR_COOLOFF_END</code></td>
+<td><code>234</code></td>
+<td>Time until the user can login again (in seconds)</td>
+</tr>
+<tr>
+<td><code>LIMIT_ACTIVATION_WAIT_PERIOD</code></td>
+<td><code>56</code></td>
+<td>The waiting period (units unknown)</td>
+</tr>
+</tbody>
+</table>
+</div></div></div><div class="resourcePanel"><div class="panel panel-default"><div class="panel-heading"><h2 id="appendix">Appendix&nbsp;<a href="#appendix"><i class="fa fa-link"></i></a></h2></div><div class="panel-body"><h3 id="appendix-rest-principles">REST Principles&nbsp;<a href="#appendix-rest-principles"><i class="fa fa-link"></i></a></h3><p>The APIs are based on REST principles. REST (Representational State
+Transfer) is the architectural style that is underlying the World Wide
+Web. The REST architectural style emphasizes some principles that are
+also applicable for Web services as are provided by the PosAPI.</p>
+<p>Calls to the API are performed as HTTP requests and response is returned
+via HTTP responses. Data is transmitted either in the request URL, or in
+the request body. Additional data is transmitted in HTTP header fields.</p>
+<ul>
+<li>
+<p><strong>Resources:</strong> The key abstraction within REST is the
+resource. The API exposes any data element that can be identified via
+some URLs as resources.</p>
+</li>
+<li>
+<p><strong>Representations:</strong> Different representations of a resource
+may be requested by clients by providing media types and languages.</p>
+</li>
+<li>
+<p><strong>Statelessness:</strong> A Server does not maintain any client state
+across HTTP requests. State is always provided via single requests.
+Hence, the PosAPI service implementation does not expect that a request
+is followed by subsequent requests. Though, global data may be persisted
+across calls. This data is observable by any interested client.</p>
+</li>
+</ul>
+<p></p>
+<p>Some REST principles were not satisfied:</p>
+<ul>
+<li><strong>Idempotency:</strong> GET requests to the same resource shall
+always return the same data. However, data within the gaming domain is
+rather stale due frequent update of betting odds. For simplifying
+construction of clients the API does not guarantee that identical data
+is returned.</li>
+</ul>
+<h3 id="appendix-request">Request&nbsp;<a href="#appendix-request"><i class="fa fa-link"></i></a></h3><p>All requests are performed with one of the HTTP methods <code>GET</code>, <code>POST</code>, <code>PUT</code>,
+or <code>DELETE</code> (<code>PUT</code> is currently not used but may be used in further releases
+of the API).</p>
+<h4 id="header-message">Message <a class="permalink" href="#header-message" aria-hidden="true">¶</a></h4>
+<p>PosAPI uses standard HTTP request messages as defined in <a href="http://tools.ietf.org/html/rfc2616#section-5">RFC 2616
+Section 5</a>.</p>
+<h4 id="header-format">Format <a class="permalink" href="#header-format" aria-hidden="true">¶</a></h4>
+<p>A request format needs to be provided for every HTTP POST request. This
+is done with the <code>Content-Type</code> HTTP header.</p>
+<pre><code class="language-http"><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/xml</span></code></pre>
+<p>Accepted content-types are <code>application/xml</code> and <code>application/json</code>. 
+If an empty or invalid content type is provided the HTTP Response Code
+<strong>415 Unsupported Media</strong> Type is returned.</p>
+<h3 id="appendix-response">Response&nbsp;<a href="#appendix-response"><i class="fa fa-link"></i></a></h3><h4 id="header-message-1">Message <a class="permalink" href="#header-message-1" aria-hidden="true">¶</a></h4>
+<p>PosAPI uses standard HTTP response messages as defined in <a href="http://tools.ietf.org/html/rfc2616#section-6">RFC 2616
+Section 6</a>.</p>
+<h4 id="header-format-1">Format <a class="permalink" href="#header-format-1" aria-hidden="true">¶</a></h4>
+<p>A response that is returned by PosAPI is either formatted as <em>XML</em>, <em>JSON</em>
+or as <em>JSONP</em> (JSON with padding). The return format is chosen by setting
+the media type in the <code>Accept</code> Http-header field or the jsonp query
+parameter. <em>JSONP</em> is only supported for <code>GET</code> requests. When the jsonp
+query parameter is present it overrules the provided <code>Accept</code> header
+field.</p>
+<h5 id="header-xml">XML <a class="permalink" href="#header-xml" aria-hidden="true">¶</a></h5>
+<pre><code class="language-http"><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/xml</span></code></pre>
+<h5 id="header-json">JSON <a class="permalink" href="#header-json" aria-hidden="true">¶</a></h5>
+<pre><code class="language-http"><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre>
+<h5 id="header-jsonp">JSONP <a class="permalink" href="#header-jsonp" aria-hidden="true">¶</a></h5>
+<pre><code class="language-http"><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/javascript</span></code></pre>
+<p>If an empty or invalid response format is requested the default type
+“application/xml” will be used.</p>
+<h3 id="appendix-error-messages">Error Messages&nbsp;<a href="#appendix-error-messages"><i class="fa fa-link"></i></a></h3><p>Service operations return standard HTTP Status Codes as defined in <a href="http://tools.ietf.org/html/rfc2616#section-10">RFC
+2616 Section 10</a>. More
+error details are returned in the form of a response body in the
+following format:</p>
+<h4 id="header-xml-error">XML Error <a class="permalink" href="#header-xml-error" aria-hidden="true">¶</a></h4>
+<pre><code class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-title">Error</span>&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-title">Code</span>&gt;</span>IntegerValue<span class="hljs-tag">&lt;/<span class="hljs-title">Code</span>&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-title">Message</span>&gt;</span>StringMessage<span class="hljs-tag">&lt;/<span class="hljs-title">Message</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">Error</span>&gt;</span></code></pre>
+<h4 id="header-json-error">JSON Error <a class="permalink" href="#header-json-error" aria-hidden="true">¶</a></h4>
+<pre><code class="language-json">{
+    "<span class="hljs-attribute">code</span>":<span class="hljs-value">IntegerValue</span>,
+    "<span class="hljs-attribute">message</span>":<span class="hljs-value"><span class="hljs-string">"StringMessage"</span>
+</span>}</code></pre>
+<h3 id="appendix-language-selection">Language Selection&nbsp;<a href="#appendix-language-selection"><i class="fa fa-link"></i></a></h3><p>Every AccessId has a predefined language that is used by default - the so-called <em>defaultLanguageId</em>.
+It is however possible to override this language, by setting a <strong><em>lang</em></strong> query-string parameter.</p>
+<p>Clients can retrieve of supported languages by calling the PosAPI’s <em>Common</em> functionality endpoint for <a href="#common-language" title="languages">languages</a>.</p>
+<p>The language is validated against the list of supported languages of the platform. E.g. when <code>lang=nl</code> is retrieved, PPOS validates if dutch is a supported language on that label.
+If an invalid language is requested, http status code <strong>400 Invalid Input</strong> is returned with a corresponding errorCode and message.</p>
+<h3 id="header-format-2">Format <a class="permalink" href="#header-format-2" aria-hidden="true">¶</a></h3>
+<p>Accepted formats for the language parameter is either the</p>
+<ul>
+<li>
+<p>language id: unique two-letter code, e.g. <code>en</code>, <code>de</code>, <code>nl</code></p>
+</li>
+<li>
+<p>dotNetCulture code: unique culture code, e.g. <code>en-US</code>, <code>en-GB</code>, <code>de-DE</code></p>
+</li>
+</ul>
+<p>Invalid formats:</p>
+<ul>
+<li>
+<p>platform language code: <code>en_US</code>, <code>en_GB</code>, <code>de_DE</code></p>
+</li>
+<li>
+<p>sports language id: <code>1</code>, <code>2</code>, <code>17</code></p>
+</li>
+</ul>
+<h3 id="appendix-api-versioning">API Versioning&nbsp;<a href="#appendix-api-versioning"><i class="fa fa-link"></i></a></h3><p>The Version of the API is encoded in the request URL after the endpoint. In this case it’s <strong>V3</strong>.</p>
+<pre><code class="language-http">https://api.bwin.com/V3/Common.svc/Country</code></pre>
+<h3 id="appendix-accessids">AccessIds&nbsp;<a href="#appendix-accessids"><i class="fa fa-link"></i></a></h3><p>For identification purposes each client is assigned a unique AccessId.
+Depending on this ID it is possible to set different behaviours and
+access rights on API level. For instance, depending on requirements, it
+is possible to block modules of different APIs and similar such
+functionality.</p>
+<p>Sending this AccessId with every request is mandatory. In case of
+setting an invalid AccessId the following error code is returned:</p>
+<h4 id="header-error">Error <a class="permalink" href="#header-error" aria-hidden="true">¶</a></h4>
+<pre><code class="language-http"><span class="hljs-status">HTTP/1.1 <span class="hljs-number">400</span> Bad Request</span></code></pre>
+<pre><code class="language-json">{
+    "<span class="hljs-attribute">code</span>": <span class="hljs-value"><span class="hljs-number">201</span></span>,
+    "<span class="hljs-attribute">message</span>": <span class="hljs-value"><span class="hljs-string">"Invalid access security token [Token]."</span>
+</span>}</code></pre>
+<p></p>
+<p>The AccessId needs to be set to the <code>x-bwin-accessId</code> HTTP header field
+or query-string parameter. Assuming that the AccessId sent to you was
+XYZ9876ABC123, this would look like the samples below.</p>
+<h4 id="header-example-header">Example: Header <a class="permalink" href="#header-example-header" aria-hidden="true">¶</a></h4>
+<pre><code class="language-http"><span class="hljs-attribute">x-bwin-accessId</span>: <span class="hljs-string">XYZ987ABC123 </span></code></pre>
+<h4 id="header-example-query-string-parameter">Example: Query-string Parameter <a class="permalink" href="#header-example-query-string-parameter" aria-hidden="true">¶</a></h4>
+<pre><code class="language-http">https://api.bwin.com/V3/Common.svc/Country?x-bwin-accessId=XYZ987ABC123</code></pre>
+<h4 id="header-getting-an-accessid">Getting an AccessId <a class="permalink" href="#header-getting-an-accessid" aria-hidden="true">¶</a></h4>
+<blockquote>
+<p>In order to <strong>request</strong> an AccessID please get in touch with your bwin.party contact.</p>
+</blockquote>
+<h3 id="appendix-remarks-regarding-samples">Remarks regarding samples&nbsp;<a href="#appendix-remarks-regarding-samples"><i class="fa fa-link"></i></a></h3><p>Samples are trimmed down to only show custom-headers and other
+standard values are assumed. For added clarity the <code>Host</code> and
+<code>Content-Type</code> are left in place. Fell free to imagine the other headers
+like <code>Content-Length</code>, <code>Cache-Control</code>, <code>Date</code>, and whatnot.</p>
+<blockquote>
+<p>Throughout the documentation you will not find any valid AccessID or security tokens.</p>
+</blockquote>
+<h3 id="appendix-feedback">Feedback&nbsp;<a href="#appendix-feedback"><i class="fa fa-link"></i></a></h3><p>Found something that’s not documented properly, is unclear or even incorrect?</p>
+<p><strong>Please share</strong> your findings with us by contacting your PosAPI contact immediately - your support is highly appreciated!</p>
+<p><strong>Thank you!</strong></p>
+<h3 id="appendix-global-error-codes">Global Error Codes&nbsp;<a href="#appendix-global-error-codes"><i class="fa fa-link"></i></a></h3><p>These error-code combinations are shared accross different instances and modules of the PosAPI.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Status Code</th>
+<th style="text-align:center">Error Code</th>
+<th>Error Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>102</code></td>
+<td>Invalid input</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>200</code></td>
+<td>Invalid request message</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>201</code></td>
+<td>Invalid access security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>204</code></td>
+<td>Missing access security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>205</code></td>
+<td>Missing session security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>206</code></td>
+<td>Missing user security   token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>207</code></td>
+<td>Session security token expired</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>208</code></td>
+<td>User security token expired</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>209</code></td>
+<td>Invalid session security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>400</code></td>
+<td style="text-align:center"><code>210</code></td>
+<td>Invalid user security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>100</code></td>
+<td>Forbidden</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>202</code></td>
+<td>Module is blocked</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>203</code></td>
+<td>Request limit exceeded</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>204</code></td>
+<td>Missing access security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>205</code></td>
+<td>Missing session security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>403</code></td>
+<td style="text-align:center"><code>206</code></td>
+<td>Missing user security token</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>404</code></td>
+<td style="text-align:center"><code>103</code></td>
+<td>Not found</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>406</code></td>
+<td style="text-align:center"><code>104</code></td>
+<td>Unsupported response format</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>415</code></td>
+<td style="text-align:center"><code>105</code></td>
+<td>Unsupported request format</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>500</code></td>
+<td style="text-align:center"><code>101</code></td>
+<td>Internal error</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>503</code></td>
+<td style="text-align:center"><code>429</code></td>
+<td>The remote server returned with: 429 - too many requests</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>504</code></td>
+<td style="text-align:center"><code>106</code></td>
+<td>Timeout occured when calling upstream server or service</td>
+</tr>
+</tbody>
+</table>
+<h3 id="appendix-references">References&nbsp;<a href="#appendix-references"><i class="fa fa-link"></i></a></h3><p>This section contains references to books or articles that give further insights in some of the technical concepts used in this document. For some articles we have provided appropriate web-links that where valid at the time of writing. Due to the volatile nature of the WWW some of these links may no longer active when these lines are being read. We apologize for this inconvenience.</p>
+<ul>
+<li>
+<p>[REST] Roy T. Fielding: <a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm" title="Architectural Styles and the Design of Network-based Software Architectures">Architectural Styles and the Design of Network-based Software Architectures</a>, 2000</p>
+</li>
+<li>
+<p>[RESTful WS] L. Richardson and Sam Ruby: “RESTful Web Services””, 2007, O’Reilly</p>
+</li>
+<li>
+<p>[RESTful .NET] Jon Flanders: “RESTful .NET”, 2008, O’Reilly</p>
+</li>
+<li>
+<p>[RFC 2616] Roy T. Fielding et al: <a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html" title="Hyptertext Transfer Protocol – HTTP/1.1">Hyptertext Transfer Protocol – HTTP/1.1</a></p>
+</li>
+</ul>
+<h3 id="appendix-glossary">Glossary&nbsp;<a href="#appendix-glossary"><i class="fa fa-link"></i></a></h3><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Agent</code></td>
+<td>A client application that accesses the PosAPI.</td>
+</tr>
+<tr>
+<td><code>API</code></td>
+<td>Application   Programming Interface</td>
+</tr>
+<tr>
+<td><code>REST</code></td>
+<td>Representational State Transfer – architectural style (and principles and guidelines) that the World Wide Web is based upon. REST is described in the dissertation of Roy Fielding.</td>
+</tr>
+<tr>
+<td><code>HTTP</code></td>
+<td>HyperText Transfer Protocol – protocol that is used to transmit data in the World Wide Web. HTTP is a stateless protocol that uses readable text messages for request and response. Each request and response message consists of a header and a body. The body contains of text, or may be completely omitted. The header includes the</td>
+</tr>
+<tr>
+<td><code>HTTP Header</code></td>
+<td>Each request and each response include headers that include data that describe the request or the response in more detail. Header fields are used to give information about the requested/returned media type, the language. Custom header fields can be used to transmit data that is used recurrently. For instance, information about authenticated customers has to be transmitted in each request in a specific header field.</td>
+</tr>
+<tr>
+<td><code>HTTP Method</code></td>
+<td>The method that is used to transmit data. The REST definition</td>
+</tr>
+<tr>
+<td><code>URI</code></td>
+<td>Uniform Resource Identifier – a textual description that identifies a resource. In the context of this document we always mean the identification within the World Wide Web. In that case an Uri looks like: <a href="http://api.bwin.com/myservice">http://api.bwin.com/myservice</a>.</td>
+</tr>
+<tr>
+<td><code>URL</code></td>
+<td>Uniform Resource Locator – a specific variant of an URI that identifies and localizes a resource using a network protocol. In this document all referenced URIs are URLs that use HTTP as the network protocol.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="appendix-documentation-guideline">Documentation Guideline&nbsp;<a href="#appendix-documentation-guideline"><i class="fa fa-link"></i></a></h3><blockquote>
+<p>The following addresses developers who are actively contributing to the API and its documenation.</p>
+</blockquote>
+<ul>
+<li>
+<p>Use a JSON formatter/validator for all JSON request and response samples, e.g. <a href="http://jsonformatter.curiousconcept.com/" title="JsonFormatter">http://jsonformatter.curiousconcept.com/</a></p>
+</li>
+<li>
+<p>Use a Markdown table generator in order to easily transform tables into markdown sytax, e.g. <a href="http://www.tablesgenerator.com/markdown_tables" title="TablesGenerator.com">http://www.tablesgenerator.com/markdown_tables</a></p>
+</li>
+</ul>
+</div></div></div></div><div id="nav-container" class="col-md-3"><a href="#"><img id="logo" src="logo_darkgray_80.png" alt="PosAPI logo"></a><nav data-spy="affix" data-offset-top="60" data-offset-bottom="100" class="nav-list hidden-sm hidden-xs"><ul class="nav"><li><a href="#authentication">Authentication</a><ul id="authentication-menu" style="display:none;" class="nav"><li><a href="#authentication-usertoken-and-sessiontoken">UserToken and SessionToken</a></li><li><a href="#authentication-account-category-ids">Account Category Ids</a></li><li><a href="#authentication-player-category-ids">Player Category Ids</a></li><li><a href="#authentication-checkcountryblock"><span class="badge alert-info"><i class="fa fa-arrow-down"></i></span>CheckCountryBlock</a></li><li><a href="#authentication-login"><span class="badge alert-success"><i class="fa fa-plus"></i></span>Login</a></li><li><a href="#authentication-pid-login"><span class="badge alert-success"><i class="fa fa-plus"></i></span>PID-Login</a></li><li><a href="#authentication-logout"><span class="badge alert-success"><i class="fa fa-plus"></i></span>Logout</a></li><li><a href="#authentication-cancel-workflow"><span class="badge alert-success"><i class="fa fa-plus"></i></span>Cancel Workflow</a></li><li><a href="#authentication-authorization">Authorization</a></li><li><a href="#authentication-workflow-ids">Workflow IDs</a></li><li><a href="#authentication-postlogin-values">PostLogin Values</a></li></ul></li><li><a href="#appendix">Appendix</a><ul id="appendix-menu" style="display:none;" class="nav"><li><a href="#appendix-rest-principles">REST Principles</a></li><li><a href="#appendix-request">Request</a></li><li><a href="#appendix-response">Response</a></li><li><a href="#appendix-error-messages">Error Messages</a></li><li><a href="#appendix-language-selection">Language Selection</a></li><li><a href="#appendix-api-versioning">API Versioning</a></li><li><a href="#appendix-accessids">AccessIds</a></li><li><a href="#appendix-remarks-regarding-samples">Remarks regarding samples</a></li><li><a href="#appendix-feedback">Feedback</a></li><li><a href="#appendix-global-error-codes">Global Error Codes</a></li><li><a href="#appendix-references">References</a></li><li><a href="#appendix-glossary">Glossary</a></li><li><a href="#appendix-documentation-guideline">Documentation Guideline</a></li></ul></li></ul></nav></div></div></div><p style="text-align: center;" class="text-muted">Generated by&nbsp;<a href="https://github.com/danielgtaylor/aglio" class="aglio">aglio</a>&nbsp;on 27 May 2018</p><div id="localFile" style="display: none; position: absolute; top: 0; left: 0; width: 100%; color: white; background: red; font-size: 150%; text-align: center; padding: 1em;">This page may not display correctly when opened as a local file. Instead, view it from a web server.
+</div><div id="TokenManagement" tab-index="-1" role="dialog" aria-labelledby="TokenManagementLabel" aria-hidden="true" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button data-dismiss="modal" aria-label="Close" class="close">&times;</button><h4 id="TokenManagementLabel" class="modal-title">Token Management</h4></div><div class="modal-body"><div class="input-group"><span id="accessId" class="input-group-addon alert-danger">AccessID</span><input id="accessIdInput" type="text" aria-describedby="accessId" placeholder="not specified" class="form-control"></div><div role="alert" class="alert alert-info alert-dismissable"><strong>Information!</strong><br>SessionToken and UserToken are mandatory for requests which require an authenticated user.<br>They are returned by a successfull <a onclick="CloseAndRedirectTo('#authentication-login');"><strong>Login</strong></a> request.</div><div class="input-group"><span id="sessionToken" class="input-group-addon alert-warning">SessionToken</span><input id="sessionTokenInput" type="text" aria-describedby="sessionToken" placeholder="not specified" class="form-control"></div><div class="input-group"><span id="userToken" class="input-group-addon alert-warning">UserToken</span><input id="userTokenInput" type="text" aria-describedby="userToken" placeholder="not specified" class="form-control"></div></div><div class="modal-footer"><button onclick="SaveTokens();" class="btn btn-primary">Save Changes</button></div></div></div></div></body><script src="//code.jquery.com/jquery-1.11.0.min.js"></script><script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script><script src="mixin.js"></script><script src="jquery.cookie.js"></script><script src="ace.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script><script>(function() {
+  if (location.protocol === 'file:') {
+    document.getElementById('localFile').style.display = 'block';
+  }
+
+}).call(this);
+</script><script>(function() {
+  $('table').addClass('table');
+
+}).call(this);
+</script></html>

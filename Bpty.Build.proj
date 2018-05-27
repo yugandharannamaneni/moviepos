@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project ToolsVersion="12.0" DefaultTargets="Bpty_BuildSolution" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!-- Project setup -->
+    <PropertyGroup>
+        <Solution>$(MSBuildProjectDirectory)\BoxOffice.sln</Solution>
+        <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
+        <NugetVersionTemplate>4.46.*</NugetVersionTemplate>
+        
+        <AglioTemplate>C:\Yugandhar\MoviePOS\Doumentation\posapi_aglio.jade</AglioTemplate>
+        <AglioInputFile>$(MSBuildProjectDirectory)\posapi.md</AglioInputFile>
+        <AglioOutputFile>$(MSBuildProjectDirectory)\BoxOffice.Api\index.partial</AglioOutputFile>
+        
+        <OutputPath>.</OutputPath>
+    </PropertyGroup>
+  
+    <ItemGroup>
+        <CustomProperties Include="IISEndpoint\IISEndPoint.csproj">
+            <DismeServiceShortcut>api_v0</DismeServiceShortcut>
+            <PackageName>MoviePos.Api_v0</PackageName>
+            <!-- DismeDeploymentTemplate>ppos_autodeploy</DismeDeploymentTemplate -->
+        </CustomProperties>
+    </ItemGroup>
+          
+    <!-- ===== -->
+    <!-- Aglio -->
+    <!-- ===== -->
+    <Target Name="Aglio">
+        <Message Text="&#10;=== Aglio Documentation Transformation ===" Importance="high" />
+        
+        <PropertyGroup>
+            <NodeExe Condition="'$(NodeExe)'==''">C:\Program Files\nodejs\node.exe</NodeExe>
+            <AglioJs Condition="'$(AglioJs)'==''">C:\BuildProcess\tools\vanilla\nodejs_5.2.0\node_modules\aglio\bin\aglio.js</AglioJs>
+        </PropertyGroup>
+        
+        <!-- Checking existence of node and aglio -->
+        <Error Condition="!Exists('$(NodeExe)')" Text="Cannot find NodeJs executable! Update your buildprocess and try again."/>
+        <Error Condition="!Exists('$(AglioJs)')" Text="Cannot find Aglio! Update your buildprocess and try again."/>
+        <Message Text="&#10;&gt; node and aglio found" Importance="high" />
+        
+        <!-- Deleting old files where the output should go -->
+        <ItemGroup>
+            <_FilesToDelete Include="$(AglioOutputFile)" />
+        </ItemGroup>
+        <Message Condition="Exists('$(AglioOutputFile)')" Text="> deleting existing documentation..." Importance="high" />
+        <Delete Files="@(_FilesToDelete)" />
+        <Message Condition="!Exists('$(AglioOutputFile)')" Text="> existing documentation deleted" Importance="high" />
+        
+        <!-- Actually transforming documentation -->
+        <Message Text="> transforming documentation..." Importance="high" />
+        <Message Text='> command: "$(NodeExe)" "$(AglioJs)" -i "$(AglioInputFile)" -o "$(AglioOutputFile)" -t "$(AglioTemplate)"' Importance="high" />
+        <Exec  Command='"$(NodeExe)" "$(AglioJs)" -i "$(AglioInputFile)" -o "$(AglioOutputFile)" -t "$(AglioTemplate)"' LogStandardErrorAsError="true" />
+        <Error Condition="!Exists('$(AglioOutputFile)')" Text="Cannot find the generated documentation"/>
+    </Target>
+
+    <!-- ======================================================================== -->
+    <!-- BuildNuget -->
+    <!-- ======================================================================== -->
+   
+    <Target Name="BuildNuget" DependsOnTargets="$(_BuildNugetDependsOn)" Condition="'@(PosNuspec)' != ''">
+        <Message Text="&#13;&#10;=== Creating NuGet packages ===&#13;&#10;" Importance="high" />
+        
+        <RemoveDir Directories="$(BptyBuildOutputFolder)\Packages" />
+        <Makedir Directories="$(BptyBuildOutputFolder)\Packages" />
+        
+        <PropertyGroup>
+            <NugetVersionTemplate>$(NugetVersionTemplate.Replace("*", $(RevisionNumber)))</NugetVersionTemplate>
+        </PropertyGroup>
+        
+        <Exec 
+          Command='"$(NugetExe)" pack "%(PosNuspec.Identity)" -version $(NugetVersionTemplate) -outputdirectory "$(BptyBuildOutputFolder)\Packages"' 
+          WorkingDirectory='$(BptyBuildOutputFolder)'
+          LogStandardErrorAsError="true"
+        />
+    </Target>
+  
+  <!-- ======================================================================== -->
+  <!-- PublishNuget -->
+  <!-- ======================================================================== -->
+    <PropertyGroup>
+        <_PublishNugetDependsOn Condition="'$(_PublishNugetDependsOn)'==''">BuildNuget</_PublishNugetDependsOn>
+    </PropertyGroup>
+    <Target Name="PublishNuget" DependsOnTargets="$(_PublishNugetDependsOn)">
+        <ItemGroup>
+            <_PublishPackages Include="$(BptyBuildOutputFolder)\Packages\*.nupkg" />
+        </ItemGroup>
+        <Exec 
+          Command="&quot;$(NugetExe)&quot; push &quot;%(_PublishPackages.Identity)&quot; -source $(BwinNugetPushFeed)"
+          LogStandardErrorAsError="true"
+        />   
+    </Target>
+</Project>
