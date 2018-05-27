@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace BoxOffice.Api.Controllers
 {
@@ -15,6 +16,7 @@ namespace BoxOffice.Api.Controllers
     /// Master Data API: Provides api for theatre master data.
     /// </summary>
     [RoutePrefix("api/login")]
+    [EnableCors(origins: "*", headers: "*", methods: "*", exposedHeaders: "X-My-Header")]
     public class LoginController : ApiController
     {
         private ILog Log = LogManager.GetLogger(typeof(MasterDataController));
@@ -38,22 +40,30 @@ namespace BoxOffice.Api.Controllers
             _movieTimingsRepository = movieTimingsRepository;
         }
 
+        public class User
+        {
+            public string username { get; set; }
+            public string password { get; set; }
+            public string vendorname { get; set; }
+        }
+
         /// <summary>
         /// Returns list of theatres available.
         /// </summary>
         /// <returns>List of Theatre</returns>
-        public HttpResponseMessage Login(string username, string password, string vendorname)
+        [HttpPost]
+        public HttpResponseMessage Login(User user)
         {
             try
             {
-                if (vendorname.ToLower() == "bookmyshow")
+                if (user.vendorname.ToLower() == "bookmyshow")
                 {
-                    if (username.ToLower() == ConfigurationManager.AppSettings["bmsUserName"]
-                        && password.ToLower() == ConfigurationManager.AppSettings["bmsPassword"])
+                    if (user.username.ToLower() == ConfigurationManager.AppSettings["bmsUserName"]
+                        && user.password.ToLower() == ConfigurationManager.AppSettings["bmsPassword"])
                     {
                         var jsonToken = new JSONToken();
-                        jsonToken.token = AuthHelper.CreateJSONWebToken(username, password, vendorname);
-                        return ConstructedJSONToken(jsonToken, username);
+                        jsonToken.token = AuthHelper.CreateJSONWebToken(user.username, user.password, user.vendorname);
+                        return ConstructedJSONToken(jsonToken, user.username);
                     }
                     return Request.CreateResponse(HttpStatusCode.Forbidden, "Invalid username or password");
                 }

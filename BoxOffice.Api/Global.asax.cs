@@ -26,6 +26,7 @@ namespace BoxOffice.Api
             //if (path.IndexOf("/api/paymentsuccess/paymentconfirmed") > -1 || path.IndexOf("/api/qrcode/get") > -1) return;
 
             if (!path.StartsWith("/api/")) return;
+            if (path.Contains("login")) return;
             if (Request.Headers.AllKeys.Contains("Auth-Token"))
             {
                 var authToken = Request.Headers["Auth-Token"];
